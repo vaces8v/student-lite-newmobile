@@ -1,0 +1,8 @@
+{
+  "fonts": [
+    {
+      "asset": "./assets/fonts/Poppins-Medium.ttf",
+      "name": "Poppins-Medium"
+    }
+  ]
+}

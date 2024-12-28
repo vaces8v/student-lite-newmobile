@@ -6,6 +6,7 @@ import { RootStackParamList } from "@/types/navigation";
 import Animated, { FadeInDown, FadeOutUp, Layout, SharedTransition, withSpring } from "react-native-reanimated";
 
 export interface LessonProp {
+    id?: number;
     timeStart: string;
     timeEnd: string;
     lesson: string;
@@ -35,7 +36,7 @@ const Lesson = ({timeStart, timeEnd, lesson, office, content, theme}: LessonProp
             <TouchableOpacity 
                 activeOpacity={0.8} 
                 onPress={() => navigation.navigate('MoreDetails', {item: data})} 
-                className="rounded-[20px] mt-[10px] overflow-hidden w-[95%] mx-auto"
+                className="rounded-[20px] mt-[10px] overflow-hidden w-[100%] mx-auto"
             >
                 <BlurView intensity={20} className="flex py-[15px] flex-row w-full h-auto">
                     <View className="flex px-[5px] h-auto justify-between">

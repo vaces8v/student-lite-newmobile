@@ -36,11 +36,11 @@ export default function HomeScreen({ }: HomeScreenNavigationProp) {
         }
 
         if (!login && !password) {
-            showToast('Пожалуйста, введите почту и пароль');
+            showToast('Пожалуйста, введите логин и пароль');
             return;
         }
         if (!login) {
-            showToast('Пожалуйста, введите почту');
+            showToast('Пожалуйста, введите логин');
             return;
         }
         if (!password) {
@@ -53,7 +53,7 @@ export default function HomeScreen({ }: HomeScreenNavigationProp) {
                 showToast('Успешный вход', 'success');
                 navigation.replace('Details');
             } else {
-                showToast('Неверная почта или пароль');
+                showToast('Неверный логин или пароль');
             }
         } catch (error) {
             showToast('Ошибка входа');

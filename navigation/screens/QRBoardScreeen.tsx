@@ -35,20 +35,25 @@ const QrCodeScreen = () => {
     const [facing, setFacing] = useState<CameraType>('back');
 
     const blurOpacity = useSharedValue(0);
-    useEffect(() => {
-        bottomSheetModalRef.current?.present();
-    }, [])
 
-    const handlePresentModalPress = useCallback(() => {
-        setModalVisible(true);
-        blurOpacity.value = withTiming(1, {
-            duration: 300,
-            easing: Easing.ease
-        });
-        if (bottomSheetModalRef.current) {
+    useEffect(() => {
+        const checkAndRequestPermission = async () => {
+            if (!permission?.granted) {
+                const status = await requestPermission();
+                if (!status?.granted) {
+                    Alert.alert(
+                        'Разрищение на камеру',
+                        'Разрешение на камеру обязательно для сканирования QR-кодов.',
+                        [{ text: 'OK', onPress: () => navigation.goBack() }]
+                    );
+                    return;
+                }
+            }
             bottomSheetModalRef.current?.present();
-        }
-    }, []);
+        };
+
+        checkAndRequestPermission();
+    }, [permission, requestPermission, navigation])
 
     const handleDismiss = useCallback(() => {
         blurOpacity.value = withTiming(0, {
@@ -85,9 +90,9 @@ const QrCodeScreen = () => {
                 >
                     <BottomSheetView style={[styles.contentContainer]}>
                         {!permission ? (
-                                <LinearGradient
+                            <LinearGradient
                                 colors={['#462ab2', '#1e124c']}
-                                className="flex flex-1 items-center justify-center" style={{ flex: 1, width: '100%'}}>
+                                className="flex flex-1 items-center justify-center" style={{ flex: 1, width: '100%' }}>
                                 <View className="flex justify-center items-center overflow-hidden rounded-[20px]">
                                     <BlurView intensity={30} className="h-[200px] w-[350px]">
                                         <View className="flex justify-center items-center w-full h-full">
@@ -104,70 +109,70 @@ const QrCodeScreen = () => {
                             </LinearGradient>
                         ) : (
                             <CameraView
-                            style={styles.camera}
-                            facing={facing}
-                            barcodeScannerSettings={{
-                                barcodeTypes: ["qr"],
-                            }}
-                            onBarcodeScanned={handleBarCodeScanned}
-                        >
-                            <View 
-                                style={{ marginTop: ScreenHeight / 6, padding: 10, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: 200, height: 50 }}>
-                                <BlurView
-                                    intensity={80}
-                                    tint="dark"
-                                    style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, width: 320, height: 60}}>
-                                    <Text style={{ fontSize: 18, color: "#ffffff" }}>Отсканируйте QR-код</Text>
-                                </BlurView>
-                            </View>
-                            <View
-                                style={{flex: 1}}>
-                                <Animatable.View
-                                    animation="pulse"
-                                    easing="ease-out"
-                                    iterationCount="infinite">
-                                    <Scan color="#ffffff" strokeWidth={.25} size={350} />
-                                </Animatable.View>
-                            </View>
+                                style={styles.camera}
+                                facing={facing}
+                                barcodeScannerSettings={{
+                                    barcodeTypes: ["qr"],
+                                }}
+                                onBarcodeScanned={handleBarCodeScanned}
+                            >
+                                <View
+                                    style={{ marginTop: ScreenHeight / 6, padding: 10, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: 200, height: 50 }}>
+                                    <BlurView
+                                        intensity={80}
+                                        tint="dark"
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, width: 320, height: 60 }}>
+                                        <Text style={{ fontSize: 18, color: "#ffffff" }}>Отсканируйте QR-код</Text>
+                                    </BlurView>
+                                </View>
+                                <View
+                                    style={{ flex: 1 }}>
+                                    <Animatable.View
+                                        animation="pulse"
+                                        easing="ease-out"
+                                        iterationCount="infinite">
+                                        <Scan color="#ffffff" strokeWidth={.25} size={350} />
+                                    </Animatable.View>
+                                </View>
 
-                            <View style={styles.buttonContainer}>
-                                <View
-                                    style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: ScreenHeight / 5, padding: 10, borderRadius: 100, width: 80, height: 80, overflow: 'hidden'}}>
-                                    <BlurView
-                                        intensity={80}
-                                        tint="dark"
-                                        style={{ padding: 10, width: 110, height: 100, marginBottom: -10, justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
-                                        <TouchableOpacity
-                                            onPress={switchFacing}
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "center",
-                                                alignItems: "center"
-                                            }}>
-                                            <SwitchCamera style={{ marginRight: 2, marginBottom: 10 }} color="#ffffff" size={60}
-                                                strokeWidth={0.75} />
-                                        </TouchableOpacity>
-                                    </BlurView>
+                                <View style={styles.buttonContainer}>
+                                    <View
+                                        style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: ScreenHeight / 5, padding: 10, borderRadius: 100, width: 80, height: 80, overflow: 'hidden' }}>
+                                        <BlurView
+                                            intensity={80}
+                                            tint="dark"
+                                            style={{ padding: 10, width: 110, height: 100, marginBottom: -10, justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
+                                            <TouchableOpacity
+                                                onPress={switchFacing}
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center"
+                                                }}>
+                                                <SwitchCamera style={{ marginRight: 2, marginBottom: 10 }} color="#ffffff" size={60}
+                                                    strokeWidth={0.75} />
+                                            </TouchableOpacity>
+                                        </BlurView>
+                                    </View>
+                                    <View
+                                        style={{ marginTop: ScreenHeight / 5, padding: 10, borderRadius: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: 80, height: 80 }}>
+                                        <BlurView
+                                            intensity={80}
+                                            tint="dark"
+                                            style={{ padding: 10, width: 110, height: 100, marginBottom: 10, justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
+                                            <TouchableOpacity
+                                                onPress={() => navigation.navigate('Details')}
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center"
+                                                }}>
+                                                <LogOut style={{ marginLeft: 5, marginBottom: -10 }} color="#ffffff" size={50} strokeWidth={0.75} />
+                                            </TouchableOpacity>
+                                        </BlurView>
+                                    </View>
                                 </View>
-                                <View
-                                    style={{ marginTop: ScreenHeight / 5, padding: 10, borderRadius: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', width: 80, height: 80 }}>
-                                    <BlurView
-                                        intensity={80}
-                                        tint="dark"
-                                        style={{ padding: 10, width: 110, height: 100, marginBottom: 10, justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
-                                        <TouchableOpacity
-                                            onPress={() => navigation.navigate('Details')}
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "center",
-                                                alignItems: "center"
-                                            }}>
-                                            <LogOut style={{ marginLeft: 5, marginBottom: -10 }} color="#ffffff" size={50} strokeWidth={0.75} />
-                                        </TouchableOpacity>
-                                    </BlurView>
-                                </View>
-                            </View>
-                        </CameraView>
+                            </CameraView>
                         )}
                     </BottomSheetView>
                 </BottomSheetModal>

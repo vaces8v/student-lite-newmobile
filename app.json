@@ -6,25 +6,47 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "scheme": "studentlite",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "org.studentlite.mobile",
+      "buildNumber": "1.0.0"
     },
     "android": {
-      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.studentlite"
+      "package": "org.studentlite.mobile",
+      "versionCode": 1,
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6e6bae20-1fd1-4559-9e0f-66ee191eb536"
+      }
+    },
+    "cli": {
+      "appVersionSource": "remote"
+    },
+    "owner": "vaces8v",
+    "fonts": [
+      {
+        "asset": "./assets/fonts/Poppins-Medium.ttf",
+        "font": "Poppins-Medium"
+      }
+    ]
   }
 }

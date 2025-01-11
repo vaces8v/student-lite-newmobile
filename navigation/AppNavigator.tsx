@@ -1,9 +1,9 @@
 import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 import HomeScreen from './screens/HomeScreen';
 import DetailsScreen from './screens/DetailsScreen';
 import ResetPassword from './screens/ResetPassword';
@@ -12,10 +12,13 @@ import QrCodeScreen from './screens/QRBoardScreeen';
 import { RootStackParamList } from '../types/navigation';
 import { ToastProvider } from '@/context/ToastContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import Cloudy from '../assets/svg/Cloudely';
+import { enableScreens } from 'react-native-screens';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import TabNavigator from './TabNavigator';
 
-const Stack = createStackNavigator<RootStackParamList>();
+enableScreens(true);
+
+const Stack = createSharedElementStackNavigator<RootStackParamList>();
 
 export type MoreDetailsScreenProps = NativeStackScreenProps<RootStackParamList, 'MoreDetails'>;
 
@@ -39,6 +42,7 @@ export default function AppNavigator() {
                             }}
                             initialRouteName="Home"
                         >
+                            <Stack.Screen name="Tabs" component={TabNavigator} options={{ headerShown: false, gestureEnabled: true, gestureDirection: 'horizontal' }} />
                             <Stack.Screen
                                 name="Home"
                                 component={HomeScreen}
@@ -46,23 +50,6 @@ export default function AppNavigator() {
                                     title: 'Главная',
                                     header: () => null,
                                     animation: 'fade'
-                                }}
-                            />
-                            <Stack.Screen
-                                name="Details"
-                                component={DetailsScreen}
-                                options={{
-                                    title: 'Расписание',
-                                    presentation: 'card',
-                                    headerShown: true,
-                                    headerTintColor: 'white',
-                                    animation: 'fade',
-                                    headerRight: () => (
-                                        <TouchableOpacity activeOpacity={0.9} style={styles.weatherInfo}>
-                                            <Cloudy />
-                                            <Text style={styles.temperature}>+15°</Text>
-                                        </TouchableOpacity>
-                                    ),
                                 }}
                             />
                             <Stack.Screen
@@ -121,6 +108,7 @@ export default function AppNavigator() {
                                                         translateY: current.progress.interpolate({
                                                             inputRange: [0, 1],
                                                             outputRange: [layouts.screen.height, 0],
+                                                            extrapolate: 'clamp',
                                                         }),
                                                     },
                                                 ],
@@ -143,17 +131,3 @@ export default function AppNavigator() {
         </GestureHandlerRootView>
     );
 }
-
-const styles = StyleSheet.create({
-    weatherInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 20
-    },
-    temperature: {
-        color: 'white',
-        fontSize: 24,
-        marginTop: 7,
-        fontFamily: 'Poppins-Medium',
-    }
-});

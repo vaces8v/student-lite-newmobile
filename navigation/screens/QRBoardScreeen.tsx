@@ -29,7 +29,7 @@ const QrCodeScreen = () => {
     const [isModalVisible, setModalVisible] = useState(false);
     const screenHeight = Dimensions.get('window').height;
     const insetsHeight = useSafeAreaInsets().top;
-    const snapPoints = useMemo(() => [screenHeight], [screenHeight]);
+    const snapPoints = useMemo(() => [screenHeight - 20], [screenHeight]);
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [permission, requestPermission] = useCameraPermissions();
     const [facing, setFacing] = useState<CameraType>('back');
@@ -87,6 +87,7 @@ const QrCodeScreen = () => {
                     snapPoints={snapPoints}
                     onDismiss={handleDismiss}
                     enablePanDownToClose={true}
+                    enableDynamicSizing={false}
                 >
                     <BottomSheetView style={[styles.contentContainer]}>
                         {!permission ? (

@@ -74,12 +74,14 @@ const Day = ({day, lessons, onVisibleDayChange}: DayProp) => {
                 {lessons.map((lesson, index) => (
                     <Lesson
                         key={index}
+                        id={lesson.id}
                         timeStart={lesson.timeStart}
                         timeEnd={lesson.timeEnd}
                         lesson={lesson.lesson}
                         office={lesson.office}
                         content={lesson.content}
                         theme={lesson.theme}
+                        estimation={lesson.estimation}
                     />
                 ))}
             </View>

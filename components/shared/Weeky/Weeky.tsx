@@ -12,11 +12,11 @@ export interface WeekProp {
 const Weeky = ({week, days, onVisibleDayChange}: WeekProp) => {
     return (
         <Animated.View
-            style={{width: '95%', marginHorizontal: 'auto'}}
+            style={{width: '100%', marginHorizontal: 'auto'}}
             entering={FadeInDown.duration(600).springify()}
             exiting={FadeOutUp.duration(600)}
         >
-            <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', fontFamily: 'Poppins-Medium'}}>{week}</Text>
+            <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', fontFamily: 'Poppins-Medium', textAlign: 'center', marginBottom: 10, marginTop: 5}}>{week}</Text>
             <View>
                 {days.map((day, index) => (
                     <Day

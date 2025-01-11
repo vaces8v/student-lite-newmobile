@@ -51,7 +51,7 @@ export default function HomeScreen({ }: HomeScreenNavigationProp) {
         try {
             if (login === 'user' && password === '123') {
                 showToast('Успешный вход', 'success');
-                navigation.replace('Details');
+                navigation.replace('Tabs');
             } else {
                 showToast('Неверный логин или пароль');
             }

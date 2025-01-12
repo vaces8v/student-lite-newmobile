@@ -4,55 +4,16 @@ import Animated, { FadeInDown, FadeOutUp} from "react-native-reanimated";
 import Lesson, { LessonProp } from "../Lesson/Lesson";
 
 export interface DayProp {
+    id: number;
     day: string;
     lessons: LessonProp[];
     onVisibleDayChange?: (day: string) => void;
 }
 
 const Day = ({day, lessons, onVisibleDayChange}: DayProp) => {
-    const { height: screenHeight } = useWindowDimensions();
-    const dayRef = useRef(null);
-    const [isFullyVisible, setIsFullyVisible] = useState(false);
-
-    useEffect(() => {
-        const checkVisibility = () => {
-            if (dayRef.current) {
-                dayRef.current.measureInWindow((x, y, width, height) => {
-                    // Get screen dimensions
-                    const screenHeight = Dimensions.get('window').height;
-                    
-                    // Check if the day's content is fully or mostly visible on the screen
-                    const isVisible = 
-                        y >= 0 && 
-                        y + height <= screenHeight && 
-                        lessons.length > 0 && 
-                        // Ensure at least 80% of the content is visible
-                        (screenHeight - y) / height >= 0.8;
-
-                    if (isVisible !== isFullyVisible) {
-                        setIsFullyVisible(isVisible);
-                        onVisibleDayChange?.(isVisible ? day : null);
-                    }
-                });
-            }
-        };
-
-        // Check visibility initially and on layout changes
-        checkVisibility();
-        
-        // Add a periodic check for visibility
-        const intervalId = setInterval(checkVisibility, 200);
-
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, [day, onVisibleDayChange, lessons, isFullyVisible]);
-
+   
     return (
-        <Animated.View
-            ref={dayRef}
-            entering={FadeInDown}
-            exiting={FadeOutUp}
+        <View
             className="day-element"
             data-day={day}
             style={{
@@ -85,7 +46,7 @@ const Day = ({day, lessons, onVisibleDayChange}: DayProp) => {
                     />
                 ))}
             </View>
-        </Animated.View>
+        </View>
     );
 };
 

@@ -21,9 +21,11 @@ const TEST_DATA = ['понедельник', 'вторник', 'среда', 'ч
 
 const data: WeekProp[] = [
     {
+        id: 1,
         week: 'Первая неделя',
         days: [
             {
+                id: 1,
                 day: 'Понедельник',
                 lessons: [
                     {
@@ -47,6 +49,7 @@ const data: WeekProp[] = [
                 ]
             },
             {
+                id: 2,
                 day: 'Вторник',
                 lessons: [
                     {
@@ -79,6 +82,7 @@ const data: WeekProp[] = [
                 ]
             },
             {
+                id: 3,
                 day: 'Среда',
                 lessons: [
                     {
@@ -120,6 +124,7 @@ const data: WeekProp[] = [
                 ]
             },
             {
+                id: 4,
                 day: 'Четверг',
                 lessons: [
                     {
@@ -134,6 +139,7 @@ const data: WeekProp[] = [
                 ]
             },
             {
+                id: 5,
                 day: 'Пятница',
                 lessons: [
                     {
@@ -168,9 +174,11 @@ const data: WeekProp[] = [
         ]
     },
     {
+        id: 2,
         week: 'Первая неделя',
         days: [
             {
+                id: 1,
                 day: 'Понедельник',
                 lessons: [
                     {
@@ -194,6 +202,7 @@ const data: WeekProp[] = [
                 ]
             },
             {
+                id: 2,
                 day: 'Вторник',
                 lessons: [
                     {
@@ -226,6 +235,7 @@ const data: WeekProp[] = [
                 ]
             },
             {
+                id: 3,
                 day: 'Среда',
                 lessons: [
                     {
@@ -267,6 +277,7 @@ const data: WeekProp[] = [
                 ]
             },
             {
+                id: 4,
                 day: 'Четверг',
                 lessons: [
                     {
@@ -281,6 +292,7 @@ const data: WeekProp[] = [
                 ]
             },
             {
+                id: 5,
                 day: 'Пятница',
                 lessons: [
                     {
@@ -377,6 +389,7 @@ const App = () => {
             }, 200);
         }
     };
+
     return (
         <GestureHandlerRootView style={styles.container}>
             <LinearGradient
@@ -473,13 +486,13 @@ const App = () => {
                             return (
                                 <View style={styles.page} key={index}>
                                     <ScrollView
-                                        ref={(ref) => scrollViewRefs.current[index] = ref}
+                                        ref={(ref: ScrollView) => scrollViewRefs.current[index] = ref}
                                         showsVerticalScrollIndicator={false}
                                         style={[styles.scrollViewStyle, { marginBottom: bottomInset }]}
                                         contentContainerStyle={{ paddingBottom: headerHeight + headerHeight / 3.1 - 10 }}
-                                        scrollEventThrottle={200}
                                     >
                                         <Weeky
+                                            id={week.id}
                                             week={week.week}
                                             days={week.days} />
                                     </ScrollView>

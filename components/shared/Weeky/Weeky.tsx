@@ -1,9 +1,10 @@
 import React from "react";
 import {Text, View} from "react-native";
-import Animated, { FadeInDown, FadeOutUp} from "react-native-reanimated";
 import Day, { DayProp } from "../Day/Day";
+import { FlashList } from "@shopify/flash-list";
 
 export interface WeekProp {
+    id: number;
     week: string;
     days: DayProp[];
     onVisibleDayChange?: (day: string) => void;
@@ -11,23 +12,24 @@ export interface WeekProp {
 
 const Weeky = ({week, days, onVisibleDayChange}: WeekProp) => {
     return (
-        <Animated.View
+        <View
             style={{width: '100%', marginHorizontal: 'auto'}}
-            entering={FadeInDown.duration(600).springify()}
-            exiting={FadeOutUp.duration(600)}
         >
             <Text style={{color: 'white', fontSize: 24, fontWeight: 'bold', fontFamily: 'Poppins-Medium', textAlign: 'center', marginBottom: 10, marginTop: 5}}>{week}</Text>
-            <View>
-                {days.map((day, index) => (
+            <FlashList
+                data={days}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
                     <Day
-                        key={index}
-                        day={day.day}
-                        lessons={day.lessons}
+                        id={item.id}
+                        day={item.day}
+                        lessons={item.lessons}
                         onVisibleDayChange={onVisibleDayChange}
                     />
-                ))}
-            </View>
-        </Animated.View>
+                )}
+                estimatedItemSize={70}
+            />
+        </View>
     );
 };
 

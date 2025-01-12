@@ -1,11 +1,9 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 import HomeScreen from './screens/HomeScreen';
-import DetailsScreen from './screens/DetailsScreen';
 import ResetPassword from './screens/ResetPassword';
 import MoreDetailsScreen from './screens/MoreDetailsScreen';
 import QrCodeScreen from './screens/QRBoardScreeen';
@@ -15,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { enableScreens } from 'react-native-screens';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import TabNavigator from './TabNavigator';
+import { HoldMenuProvider } from 'react-native-hold-menu';
 
 enableScreens(true);
 
@@ -23,9 +22,10 @@ const Stack = createSharedElementStackNavigator<RootStackParamList>();
 export type MoreDetailsScreenProps = NativeStackScreenProps<RootStackParamList, 'MoreDetails'>;
 
 export default function AppNavigator() {
+    const { bottom } = useSafeAreaInsets();
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <SafeAreaProvider>
+            <HoldMenuProvider safeAreaInsets={{bottom: bottom, right: 0, left: 0, top: 0}} theme="light">
                 <ToastProvider>
                     <NavigationContainer>
                         <Stack.Navigator
@@ -127,7 +127,7 @@ export default function AppNavigator() {
                         </Stack.Navigator>
                     </NavigationContainer>
                 </ToastProvider>
-            </SafeAreaProvider>
+                </HoldMenuProvider>
         </GestureHandlerRootView>
     );
 }

@@ -5,6 +5,7 @@ import AppNavigator from './navigation/AppNavigator';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 
 export default function App() {
@@ -28,9 +29,11 @@ export default function App() {
   return (
     <>
       <StatusBar style="light" backgroundColor="transparent" />
-      <View style={{ flex: 1, backgroundColor: '#1e124c' }}>
-        <AppNavigator />
-      </View>
+      <SafeAreaProvider>
+        <View style={{ flex: 1, backgroundColor: '#1e124c' }}>
+          <AppNavigator />
+        </View>
+      </SafeAreaProvider>
     </>
   );
 }

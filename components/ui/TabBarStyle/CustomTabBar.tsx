@@ -25,6 +25,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                         }
                     };
 
+
                     return (
                         <TouchableOpacity
                             key={index}
@@ -38,7 +39,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                     );
                 })}
                 <TouchableOpacity
-                onPress={() => navigation.navigate('QRBoard')}
+                    onPress={() => navigation.navigate('QRBoard')}
                     style={styles.tabButton}
                 >
                     <Animated.View style={{ opacity: 0.5 }}>

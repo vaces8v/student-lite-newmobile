@@ -162,7 +162,7 @@ const QrCodeScreen = () => {
                                             tint="dark"
                                             style={{ padding: 10, width: 110, height: 100, marginBottom: 10, justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
                                             <TouchableOpacity
-                                                onPress={() => navigation.navigate('Details')}
+                                                onPress={() => navigation.goBack()}
                                                 style={{
                                                     display: "flex",
                                                     justifyContent: "center",

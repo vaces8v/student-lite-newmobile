@@ -19,7 +19,7 @@ export interface LessonProp {
 
 const screenWidth = Dimensions.get("window").width;
 
-const Lesson = ({id, timeStart, timeEnd, lesson, office, content, theme, estimation}: LessonProp) => {
+const Lesson = ({id, timeStart, timeEnd, lesson, office, content, theme, estimation, onLayout}: LessonProp & { onLayout?: (height: number) => void; }) => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const data = {
         id: id,
@@ -43,6 +43,10 @@ const Lesson = ({id, timeStart, timeEnd, lesson, office, content, theme, estimat
     return (
         <View
             style={{ position: 'relative' }}
+            onLayout={(event) => {
+                const { height } = event.nativeEvent.layout;
+                if (onLayout) onLayout(height);
+            }}
         >
             <BlurView intensity={20} className="rounded-[20px] mt-[10px] overflow-hidden w-[100%] mx-auto">
                 <View className="flex py-[15px] flex-row w-full h-auto">

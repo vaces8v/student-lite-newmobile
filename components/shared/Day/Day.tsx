@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import {Dimensions, Text, View, useWindowDimensions} from "react-native";
-import Animated, { FadeInDown, FadeOutUp} from "react-native-reanimated";
+import { Dimensions, Text, View, useWindowDimensions } from "react-native";
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import Lesson, { LessonProp } from "../Lesson/Lesson";
 
 export interface DayProp {
@@ -10,8 +10,8 @@ export interface DayProp {
     onVisibleDayChange?: (day: string) => void;
 }
 
-const Day = ({day, lessons, onVisibleDayChange}: DayProp) => {
-   
+const Day = ({ day, lessons, onVisibleDayChange }: DayProp) => {
+
     return (
         <View
             className="day-element"
@@ -21,30 +21,34 @@ const Day = ({day, lessons, onVisibleDayChange}: DayProp) => {
                 paddingHorizontal: 15,
             }}
         >
-            <Text style={{ 
-                color: 'white', 
-                fontSize: 18, 
-                marginBottom: 2, 
-                fontWeight: 'bold', 
-                fontFamily: 'Poppins-Medium', 
+            <Text style={{
+                color: 'white',
+                fontSize: 18,
+                marginBottom: 2,
+                fontWeight: 'bold',
+                fontFamily: 'Poppins-Medium',
                 textAlign: 'center'
             }}>
                 {day}
             </Text>
             <View>
-                {lessons.map((lesson, index) => (
-                    <Lesson
-                        key={index}
-                        id={lesson.id}
-                        timeStart={lesson.timeStart}
-                        timeEnd={lesson.timeEnd}
-                        lesson={lesson.lesson}
-                        office={lesson.office}
-                        content={lesson.content}
-                        theme={lesson.theme}
-                        estimation={lesson.estimation}
-                    />
-                ))}
+                {lessons.length > 0 ?
+                    lessons.map((lesson, index) => (
+                        <Lesson
+                            key={index}
+                            id={lesson.id}
+                            timeStart={lesson.timeStart}
+                            timeEnd={lesson.timeEnd}
+                            lesson={lesson.lesson}
+                            office={lesson.office}
+                            content={lesson.content}
+                            theme={lesson.theme}
+                            estimation={lesson.estimation}
+                        />
+                    ))
+                    :
+                    <Text style={{fontFamily: 'Poppins-Regular'}} className="text-center text-lg text-white my-[5px]">Нету пар в этот день</Text>
+                }
             </View>
         </View>
     );

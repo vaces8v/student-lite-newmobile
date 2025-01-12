@@ -135,6 +135,15 @@ const data: WeekProp[] = [
                         theme: "#3AF3FF",
                         lesson: "Математика",
                         estimation: []
+                    },
+                    {
+                        id: 2,
+                        timeStart: "8:20",
+                        timeEnd: "9:40",
+                        office: "Кабинет 215",
+                        theme: "#3AF3FF",
+                        lesson: "Математика",
+                        estimation: [1, 0]
                     }
                 ]
             },
@@ -162,6 +171,24 @@ const data: WeekProp[] = [
                     },
                     {
                         id: 3,
+                        timeStart: "10:00",
+                        timeEnd: "11:20",
+                        office: "Кабинет 316",
+                        theme: "#D55CFF",
+                        lesson: "ОП.10 Численные методы",
+                        estimation: []
+                    },
+                    {
+                        id: 4,
+                        timeStart: "10:00",
+                        timeEnd: "11:20",
+                        office: "Кабинет 316",
+                        theme: "#D55CFF",
+                        lesson: "ОП.10 Численные методы",
+                        estimation: []
+                    },
+                    {
+                        id: 5,
                         timeStart: "10:00",
                         timeEnd: "11:20",
                         office: "Кабинет 316",
@@ -279,17 +306,7 @@ const data: WeekProp[] = [
             {
                 id: 4,
                 day: 'Четверг',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: []
-                    }
-                ]
+                lessons: []
             },
             {
                 id: 5,
@@ -335,6 +352,7 @@ const App = () => {
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
     const scrollViewRefs = useRef<ScrollView[]>([]);
     const pagerViewRef = useRef<PagerView>(null);
+    const lessonHeight = 130;
 
     const handleDaySelect = (selectedDay: string) => {
         const normalizedSelectedDay = selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1);
@@ -373,16 +391,18 @@ const App = () => {
 
             setTimeout(() => {
                 if (scrollViewRefs.current[foundPage.pageIndex]) {
-                    const estimatedLessonHeight = 80;
                     const dayIndex = foundPage.dayIndex;
                     let dayOffset = 0;
                     for (let i = 0; i < dayIndex; i++) {
-                        dayOffset += data[foundPage.pageIndex].days[i].lessons.length * estimatedLessonHeight + 50;
+                        const lessons = data[foundPage.pageIndex].days[i].lessons;
+                        lessons.forEach((lesson) => {
+                            dayOffset += 120;
+                        });
+                        dayOffset += 50; // Add spacing between days
                     }
-                    const safeScrollOffset = Math.max(0, dayOffset - 100);
 
                     scrollViewRefs.current[foundPage.pageIndex].scrollTo({
-                        y: safeScrollOffset,
+                        y: dayOffset,
                         animated: true
                     });
                 }

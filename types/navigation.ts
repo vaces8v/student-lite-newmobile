@@ -8,4 +8,5 @@ export type RootStackParamList = {
     Profile: undefined;
     Mail: undefined;
     QRBoard: undefined;
+    Tabs: undefined;
 };

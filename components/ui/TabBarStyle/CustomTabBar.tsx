@@ -2,7 +2,6 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Animated from 'react-native-reanimated';
-import { MaterialIcons } from '@expo/vector-icons'; // Убедитесь, что у вас установлен expo/vector-icons
 import DrawerIconSvg from '@/assets/svg/DrawerIcon';
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {

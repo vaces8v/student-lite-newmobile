@@ -25,7 +25,8 @@ export default function AppNavigator() {
     const { bottom } = useSafeAreaInsets();
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <HoldMenuProvider safeAreaInsets={{bottom: bottom, right: 0, left: 0, top: 0}} theme="light">
+            <HoldMenuProvider 
+            safeAreaInsets={{bottom: bottom, right: 0, left: 0, top: 0}} theme="light">
                 <ToastProvider>
                     <NavigationContainer>
                         <Stack.Navigator

@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PagerView from 'react-native-pager-view';
 import DatePicker from '@/components/shared/DatePicker/DatePicker';
 import Weeky, { WeekProp } from '@/components/shared/Weeky/Weeky';
+import Loader from '@/components/shared/Loader';
 
 const TEST_DATA = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница'];
 
@@ -354,6 +355,15 @@ const App = () => {
     const pagerViewRef = useRef<PagerView>(null);
     const lessonHeight = 130;
 
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, []);
+
     const handleDaySelect = (selectedDay: string) => {
         const normalizedSelectedDay = selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1);
 
@@ -398,7 +408,7 @@ const App = () => {
                         lessons.forEach((lesson) => {
                             dayOffset += 120;
                         });
-                        dayOffset += 50; // Add spacing between days
+                        dayOffset += 70;
                     }
 
                     scrollViewRefs.current[foundPage.pageIndex].scrollTo({

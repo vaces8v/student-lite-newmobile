@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, Text, View, useWindowDimensions } from "react-native";
-import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
+import React from "react";
+import { Text, View } from "react-native";
 import Lesson, { LessonProp } from "../Lesson/Lesson";
 
 export interface DayProp {
@@ -10,7 +9,7 @@ export interface DayProp {
     onVisibleDayChange?: (day: string) => void;
 }
 
-const Day = ({ day, lessons, onVisibleDayChange }: DayProp) => {
+const Day = React.memo(({ day, lessons, onVisibleDayChange }: DayProp) => {
 
     return (
         <View
@@ -32,10 +31,10 @@ const Day = ({ day, lessons, onVisibleDayChange }: DayProp) => {
                 {day}
             </Text>
             <View>
-                {lessons.length > 0 ?
-                    lessons.map((lesson, index) => (
+                {lessons.length > 0 ? 
+                    lessons.map((lesson) => (
                         <Lesson
-                            key={index}
+                            key={lesson.id} 
                             id={lesson.id}
                             timeStart={lesson.timeStart}
                             timeEnd={lesson.timeEnd}
@@ -45,13 +44,13 @@ const Day = ({ day, lessons, onVisibleDayChange }: DayProp) => {
                             theme={lesson.theme}
                             estimation={lesson.estimation}
                         />
-                    ))
+                    )) 
                     :
                     <Text style={{fontFamily: 'Poppins-Regular'}} className="text-center text-lg text-white my-[5px]">Нету пар в этот день</Text>
                 }
             </View>
         </View>
     );
-};
+});
 
 export default Day;

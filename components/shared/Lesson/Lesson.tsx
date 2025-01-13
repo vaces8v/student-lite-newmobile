@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {Dimensions, Text, View} from "react-native";
 import {BlurView} from "expo-blur";
 import { useNavigation } from "@react-navigation/native";
@@ -19,7 +19,7 @@ export interface LessonProp {
 
 const screenWidth = Dimensions.get("window").width;
 
-const Lesson = ({id, timeStart, timeEnd, lesson, office, content, theme, estimation, onLayout}: LessonProp & { onLayout?: (height: number) => void; }) => {
+const Lesson = React.memo(({id, timeStart, timeEnd, lesson, office, content, theme, estimation, onLayout}: LessonProp & { onLayout?: (height: number) => void; }) => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const data = {
         id: id,
@@ -31,22 +31,18 @@ const Lesson = ({id, timeStart, timeEnd, lesson, office, content, theme, estimat
         theme: theme,
         estimation: estimation
     }
-    const ratingColors = {
+    const ratingColors = useMemo(() => ({
         0: 'text-gray-500',
         1: 'text-red-200',
         2: 'text-red-500',
         3: 'text-yellow-500',
         4: 'text-green-500',
         5: 'text-lime-500',
-    };
+    }), []);
 
     return (
         <View
             style={{ position: 'relative' }}
-            onLayout={(event) => {
-                const { height } = event.nativeEvent.layout;
-                if (onLayout) onLayout(height);
-            }}
         >
             <BlurView intensity={20} className="rounded-[20px] mt-[10px] overflow-hidden w-[100%] mx-auto">
                 <View className="flex py-[15px] flex-row w-full h-auto">
@@ -98,6 +94,6 @@ const Lesson = ({id, timeStart, timeEnd, lesson, office, content, theme, estimat
             </BlurView>
         </View>
     );
-};
+});
 
 export default Lesson;

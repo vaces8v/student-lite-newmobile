@@ -4,6 +4,8 @@ node_modules/
 # Build artifacts
 build/
 dist/
+/android
+/ios
 
 # Environment variables
 .env

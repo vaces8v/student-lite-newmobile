@@ -47,6 +47,15 @@
         "asset": "./assets/fonts/Poppins-Medium.ttf",
         "font": "Poppins-Medium"
       }
+    ],
+    "plugins": [
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+        }
+      ]
     ]
   }
 }

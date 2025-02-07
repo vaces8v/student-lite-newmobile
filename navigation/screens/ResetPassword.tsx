@@ -19,7 +19,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ResetPassword = () => {
     const bottomSheetModalRef = useRef<BottomSheetModal | null>(null);
-    const [isModalVisible, setModalVisible] = useState(false);
     const screenHeight = Dimensions.get('window').height;
     const insetsHeight = useSafeAreaInsets().top;
     const snapPoints = useMemo(() => [screenHeight / 2], [screenHeight]);
@@ -30,24 +29,12 @@ const ResetPassword = () => {
         bottomSheetModalRef.current?.present();
     }, [])
 
-    const handlePresentModalPress = useCallback(() => {
-        setModalVisible(true);
-        blurOpacity.value = withTiming(1, {
-            duration: 300,
-            easing: Easing.ease
-        });
-        if (bottomSheetModalRef.current) {
-            bottomSheetModalRef.current?.present();
-        }
-    }, []);
-
     const handleDismiss = useCallback(() => {
         blurOpacity.value = withTiming(0, {
             duration: 300,
             easing: Easing.ease
         });
         navigation.goBack()
-        setModalVisible(false);
         if (bottomSheetModalRef.current) {
             bottomSheetModalRef.current?.dismiss();
         }

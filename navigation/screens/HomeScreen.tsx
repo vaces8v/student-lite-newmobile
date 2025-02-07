@@ -14,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useToast } from '@/context/ToastContext';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
+import { useTokenStore } from '@/store/api/token.store';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -27,6 +28,7 @@ export default function HomeScreen({ }: HomeScreenNavigationProp) {
 
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
+    const { getToken } = useTokenStore()
 
     async function loginSubmint() {
         const hasInternet = await checkInternetConnection();
@@ -49,14 +51,17 @@ export default function HomeScreen({ }: HomeScreenNavigationProp) {
         }
 
         try {
-            if (login === 'user' && password === '123') {
+            const success = await getToken({login, password});
+            
+            if (success) {
                 showToast('Успешный вход', 'success');
                 navigation.replace('Tabs');
             } else {
-                showToast('Неверный логин или пароль');
+                showToast('Неверный логин или пароль', 'error');
             }
         } catch (error) {
-            showToast('Ошибка входа');
+            showToast('Ошибка входа', 'error');
+            console.error(error);
         }
     }
 

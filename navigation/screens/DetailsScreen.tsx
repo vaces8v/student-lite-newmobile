@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     ScrollView,
     StyleSheet,
     Text,
     View,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
 import {
     GestureHandlerRootView,
@@ -16,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PagerView from 'react-native-pager-view';
 import DatePicker from '@/components/shared/DatePicker/DatePicker';
 import Weeky, { WeekProp } from '@/components/shared/Weeky/Weeky';
-import Loader from '@/components/shared/Loader';
 
 const TEST_DATA = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница'];
 
@@ -353,16 +353,34 @@ const App = () => {
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
     const scrollViewRefs = useRef<ScrollView[]>([]);
     const pagerViewRef = useRef<PagerView>(null);
-    const lessonHeight = 130;
 
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
+        const loadData = async () => {
+            try {
+                setLoading(false);
+            } catch (error) {
+                console.error('Failed to load data', error);
+                setLoading(false);
+            }
+        };
+
+        loadData();
     }, []);
+
+    if (loading) {
+        return (
+            <LinearGradient
+                colors={['#462ab2', '#1e124c']}
+                style={styles.container}
+            >
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="white" />
+                </View>
+            </LinearGradient>
+        );
+    }
 
     const handleDaySelect = (selectedDay: string) => {
         const normalizedSelectedDay = selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1);
@@ -518,7 +536,7 @@ const App = () => {
                                     <ScrollView
                                         ref={(ref: ScrollView) => scrollViewRefs.current[index] = ref}
                                         showsVerticalScrollIndicator={false}
-                                        style={[styles.scrollViewStyle, { marginBottom: bottomInset }]}
+                                        style={[styles.scrollViewStyle]}
                                         contentContainerStyle={{ paddingBottom: headerHeight + headerHeight / 3.1 - 10 }}
                                     >
                                         <Weeky
@@ -612,6 +630,11 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '600',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 });
 

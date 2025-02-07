@@ -9,4 +9,6 @@ export type RootStackParamList = {
     Mail: undefined;
     QRBoard: undefined;
     Tabs: undefined;
+    DatePicker: undefined;
+    MainTabs: undefined;
 };

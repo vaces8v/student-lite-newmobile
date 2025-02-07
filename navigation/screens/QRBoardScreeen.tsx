@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Button, View, Dimensions, ViewStyle, Text, TouchableOpacity, Alert } from 'react-native';
-import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
+import { StyleSheet, View, Dimensions, Text, TouchableOpacity, Alert } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
     BottomSheetModal,
     BottomSheetView,
     BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
-import Animated, {
+import {
     useSharedValue,
-    useAnimatedStyle,
     withTiming,
     Easing
 } from 'react-native-reanimated';
@@ -26,21 +25,24 @@ const ScreenHeight = Dimensions.get("window").height;
 
 const QrCodeScreen = () => {
     const bottomSheetModalRef = useRef<BottomSheetModal | null>(null);
-    const [isModalVisible, setModalVisible] = useState(false);
     const screenHeight = Dimensions.get('window').height;
     const insetsHeight = useSafeAreaInsets().top;
     const snapPoints = useMemo(() => [screenHeight - 20], [screenHeight]);
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [permission, requestPermission] = useCameraPermissions();
     const [facing, setFacing] = useState<CameraType>('back');
+    const [permissionDenied, setPermissionDenied] = useState(false);
 
     const blurOpacity = useSharedValue(0);
 
     useEffect(() => {
         const checkAndRequestPermission = async () => {
+            if (permissionDenied) return;
+            
             if (!permission?.granted) {
                 const status = await requestPermission();
                 if (!status?.granted) {
+                    setPermissionDenied(true);
                     Alert.alert(
                         'Разрищение на камеру',
                         'Разрешение на камеру обязательно для сканирования QR-кодов.',
@@ -53,7 +55,7 @@ const QrCodeScreen = () => {
         };
 
         checkAndRequestPermission();
-    }, [permission, requestPermission, navigation])
+    }, [permission, requestPermission, navigation, permissionDenied])
 
     const handleDismiss = useCallback(() => {
         blurOpacity.value = withTiming(0, {
@@ -61,7 +63,6 @@ const QrCodeScreen = () => {
             easing: Easing.ease
         });
         navigation.goBack()
-        setModalVisible(false);
         if (bottomSheetModalRef.current) {
             bottomSheetModalRef.current?.dismiss();
         }

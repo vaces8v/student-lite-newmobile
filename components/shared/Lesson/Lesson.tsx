@@ -1,9 +1,6 @@
 import React, { useMemo } from 'react';
-import {Dimensions, Text, View} from "react-native";
-import {BlurView} from "expo-blur";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/types/navigation";
+import { Dimensions, Text, View } from "react-native";
+import { BlurView } from "expo-blur";
 import { HoldItem } from "react-native-hold-menu";
 
 export interface LessonProp {
@@ -13,31 +10,47 @@ export interface LessonProp {
     lesson: string;
     office: string;
     content?: string;
-    theme: string;
     estimation: number[];
+    estimationComments: string[];
+    teacher: string;
+    homework: string[];
+    theme: string;
 }
 
 const screenWidth = Dimensions.get("window").width;
 
-const Lesson = React.memo(({id, timeStart, timeEnd, lesson, office, content, theme, estimation, onLayout}: LessonProp & { onLayout?: (height: number) => void; }) => {
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-    const data = {
-        id: id,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
-        lesson: lesson,
-        office: office,
-        content: content,
-        theme: theme,
-        estimation: estimation
+const generateColorFromString = (str: string): string => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
+
+    const h = (hash % 240 + 60) % 360;
+    return `hsla(${h}, 90%, 65%, 0.9)`;
+};
+
+const Lesson = React.memo(({ id, timeStart, timeEnd, lesson, office, theme, estimation, onLayout, estimationComments, teacher, homework }: LessonProp & { onLayout?: (height: number) => void; }) => {
+
+    const lessonColor = useMemo(() => generateColorFromString(lesson), [lesson]);
+
     const ratingColors = useMemo(() => ({
-        0: 'text-gray-500',
-        1: 'text-red-200',
-        2: 'text-red-500',
-        3: 'text-yellow-500',
-        4: 'text-green-500',
-        5: 'text-lime-500',
+        0: 'gray-500',
+        1: 'red-200',
+        2: 'red-500',
+        3: 'yellow-500',
+        4: 'green-500',
+        5: 'lime-500',
+        'н': 'red-500',
+    }), []);
+
+    const ratingBorderColors = useMemo(() => ({
+        0: 'border-gray-500',
+        1: 'border-red-200',
+        2: 'border-red-500',
+        3: 'border-yellow-500',
+        4: 'border-green-500',
+        5: 'border-lime-500',
+        'н': 'border-red-500',
     }), []);
 
     return (
@@ -48,46 +61,58 @@ const Lesson = React.memo(({id, timeStart, timeEnd, lesson, office, content, the
                 <View className="flex py-[15px] flex-row w-full h-auto">
                     <View className="flex px-[5px] h-full flex-col gap-[5px] justify-start">
                         <Text className="text-gray-300 text-center text-[20px] mx-2">#{id}</Text>
-                        <View style={{flex: 1}} className="flex flex-col justify-between">
-                            <Text className="text-white text-center">{timeStart}</Text>
-                            <Text className="text-white text-center">{timeEnd}</Text>
+                        <View style={{ flex: 1 }} className="flex flex-col justify-between">
+                            <Text className="text-white text-center">{timeStart.slice(0, 5)}</Text>
+                            <Text className="text-white text-center">{timeEnd.slice(0, 5)}</Text>
                         </View>
                     </View>
-                    <View style={{backgroundColor: theme }} className={`w-[2px] h-full mx-[2px]`}></View>
+                    <View style={{ backgroundColor: lessonColor }} className={`w-[2px] h-full mx-[2px]`}></View>
                     <View className="flex px-[5px] h-auto justify-start">
-                        <Text 
-                            style={{width: screenWidth/1.4, color: theme}} 
+                        <Text
+                            style={{ width: screenWidth / 1.4, color: lessonColor }}
                             className={`flex-wrap font-bold text-[18px]`}
                         >
                             {lesson}
                         </Text>
-                        <Text style={{width: screenWidth/1.4}} className={`flex-wrap font-bold text-[16px] text-gray-300`}>{office}</Text>
-                        {content ? 
-                        (<Text style={{width: screenWidth/1.4}} className={`flex-wrap text-white text-justify`}>{content}</Text>)
-                         : 
-                         <Text style={{width: screenWidth/1.4, fontFamily: 'Poppins-Medium'}} className={`flex-wrap text-white text-justify`}>Нету темы урока</Text>}
-                        <View className="flex flex-row justify-start">
-                        {estimation.length > 0 ? 
-                        (<>
-                        {estimation.map((item, index) => (
-                            <HoldItem hapticFeedback="Light" menuAnchorPosition="top-left" key={index} activateOn="tap" items={
-                                [
-                                    { text: `Причина выстовления ${item}`, onPress: () => {} },
-                                  ]
-                            }>
-                            <View>
-                                <Text 
-                                    style={{fontFamily: 'Poppins-Medium' }} 
-                                    className={`text-center text-[22px] ml-[${index === 0 ? 0 : 5}px] mr-[5px] ${ratingColors[item]}`}
-                                >
-                                    {item}
-                                </Text>
-                            </View>
-                            </HoldItem>
-                        ))}
-                        </>) 
-                        : 
-                        (<></>)}
+                        <Text className={`flex-wrap font-bold text-[16px] text-gray-300`}>{teacher}</Text>
+
+                        {theme ?
+                            (<Text style={{ width: screenWidth / 1.4 }} className={`flex-wrap text-white text-[15px] mt-[2px]`}>{theme}</Text>)
+                            :
+                            <Text style={{ width: screenWidth / 1.4, fontFamily: 'Poppins-Medium' }} className={`flex-wrap text-white text-justify mt-[2px]`}>Нету темы урока</Text>}
+                             {homework.length > 0 && homework[0] !== '' && (
+                                <Text style={{ width: screenWidth / 1.4 }} className={`flex-wrap text-white text-[15px] text-gray-400 mt-[2px]`}>Домашнее задание:</Text>)}
+                        {homework.length > 0 && homework[0] !== '' ?
+                            (<Text key="homework" style={{ width: screenWidth / 1.4 }} selectable className={`flex-wrap text-white text-gray-400 text-[14px]`}>
+                                {homework.map((item, index) => `${item}`).join('\n')}
+                            </Text>)
+                            :
+                            <Text style={{ width: screenWidth / 1.4, fontFamily: 'Poppins-Medium' }} className={`flex-wrap text-gray-400 text-justify`}>Нету домашней работы</Text>}
+                        <View className="flex flex-row justify-start mt-[5px]">
+                            {estimation.length > 0 ?
+                                (<>
+                                    {estimation.map((item, index) => (
+                                        <HoldItem hapticFeedback="Light" menuAnchorPosition="top-left" key={index} activateOn="tap" items={
+                                                [ 
+                                                    {
+                                                        text: item.toString() == 'н' ? 'Пропуск пары' : (estimationComments[index] === '' ? estimationComments[index] : 'Оценка за урок'),
+                                                        onPress: () => { },
+                                                    }
+                                                ]
+                                        }>
+                                            <View className={`relative ml-[${index === 0 ? 0 : 5}px] flex items-center justify-center border ${ratingBorderColors[item]} rounded-[10px] min-w-[30px] min-h-[30px]`}>
+                                                <Text
+                                                    style={{ fontFamily: 'Poppins-Medium' }}
+                                                    className={`absolute text-center text-[22px] bottom-[-7px] text-${ratingColors[item]}`}
+                                                >
+                                                    {item.toString().toUpperCase()}
+                                                </Text>
+                                            </View>
+                                        </HoldItem>
+                                    ))}
+                                </>)
+                                :
+                                (<></>)}
                         </View>
                     </View>
                 </View>

@@ -17,7 +17,7 @@ export const useNetworkStatus = () => {
             const state = await NetInfo.fetch();
             return state.isConnected;
         } catch (error) {
-            console.error('Error checking internet connection', error);
+            
             return false;
         }
     }, []);

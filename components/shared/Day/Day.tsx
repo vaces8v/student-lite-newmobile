@@ -41,8 +41,11 @@ const Day = React.memo(({ day, lessons, onVisibleDayChange }: DayProp) => {
                             lesson={lesson.lesson}
                             office={lesson.office}
                             content={lesson.content}
-                            theme={lesson.theme}
                             estimation={lesson.estimation}
+                            estimationComments={lesson.estimationComments}
+                            teacher={lesson.teacher}
+                            homework={lesson.homework}
+                            theme={lesson.theme}
                         />
                     )) 
                     :

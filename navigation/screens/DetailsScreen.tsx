@@ -17,357 +17,73 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PagerView from 'react-native-pager-view';
 import DatePicker from '@/components/shared/DatePicker/DatePicker';
 import Weeky, { WeekProp } from '@/components/shared/Weeky/Weeky';
-
-const TEST_DATA = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница'];
-
-const data: WeekProp[] = [
-    {
-        id: 1,
-        week: 'Первая неделя',
-        days: [
-            {
-                id: 1,
-                day: 'Понедельник',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 316",
-                        theme: "#41FFA4",
-                        lesson: "ОГСЭ.05.01 Физическая культура",
-                        estimation: [3, 4, 5]
-                    },
-                    {
-                        id: 2,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: [3, 4, 5]
-                    }
-                ]
-            },
-            {
-                id: 2,
-                day: 'Вторник',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: [3, 4, 5]
-                    },
-                    {
-                        id: 2,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: [3, 4, 5]
-                    },
-                    {
-                        id: 3,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    }
-                ]
-            },
-            {
-                id: 3,
-                day: 'Среда',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: []
-                    },
-                    {
-                        id: 2,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    },
-                    {
-                        id: 3,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    },
-                    {
-                        id: 4,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    }
-                ]
-            },
-            {
-                id: 4,
-                day: 'Четверг',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: []
-                    },
-                    {
-                        id: 2,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: [1, 0]
-                    }
-                ]
-            },
-            {
-                id: 5,
-                day: 'Пятница',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: []
-                    },
-                    {
-                        id: 2,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    },
-                    {
-                        id: 3,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    },
-                    {
-                        id: 4,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    },
-                    {
-                        id: 5,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        id: 2,
-        week: 'Первая неделя',
-        days: [
-            {
-                id: 1,
-                day: 'Понедельник',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 316",
-                        theme: "#41FFA4",
-                        lesson: "ОГСЭ.05.01 Физическая культура",
-                        estimation: [5]
-                    },
-                    {
-                        id: 2,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: [4]
-                    }
-                ]
-            },
-            {
-                id: 2,
-                day: 'Вторник',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: []
-                    },
-                    {
-                        id: 2,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: [3, 3]
-                    },
-                    {
-                        id: 3,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    }
-                ]
-            },
-            {
-                id: 3,
-                day: 'Среда',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: [2]
-                    },
-                    {
-                        id: 2,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: [5, 5]
-                    },
-                    {
-                        id: 3,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    },
-                    {
-                        id: 4,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: []
-                    }
-                ]
-            },
-            {
-                id: 4,
-                day: 'Четверг',
-                lessons: []
-            },
-            {
-                id: 5,
-                day: 'Пятница',
-                lessons: [
-                    {
-                        id: 1,
-                        timeStart: "8:20",
-                        timeEnd: "9:40",
-                        office: "Кабинет 215",
-                        theme: "#3AF3FF",
-                        lesson: "Математика",
-                        estimation: [4]
-                    },
-                    {
-                        id: 2,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: [5, 5]
-                    },
-                    {
-                        id: 3,
-                        timeStart: "10:00",
-                        timeEnd: "11:20",
-                        office: "Кабинет 316",
-                        theme: "#D55CFF",
-                        lesson: "ОП.10 Численные методы",
-                        estimation: [5, 4]
-                    }
-                ]
-            }
-        ]
-    }
-];
+import { useScheduleStore } from '@/store/api/schedule.store';
+import { useTokenStore } from '@/store/api/token.store';
+import { useNavigation } from '@react-navigation/native';
 
 const App = () => {
     const headerHeight = useHeaderHeight();
-    const bottomInset = useSafeAreaInsets().bottom;
+    const navigation = useNavigation();
+    const { studentId, fetchStudentId } = useScheduleStore();
+    const { token } = useTokenStore.getState();
+
+    useEffect(() => {
+        const initializeStudentId = async () => {
+            if (!token) {
+                //@ts-ignore
+                navigation.navigate('Home');
+                return;
+            }
+
+            try {
+                const id = await fetchStudentId();
+                if (!id) {
+                    console.error('Failed to fetch student ID')
+                }
+            } catch (error) {
+                
+            }
+        };
+
+        initializeStudentId();
+    }, [token, fetchStudentId, navigation]);
 
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
     const scrollViewRefs = useRef<ScrollView[]>([]);
     const pagerViewRef = useRef<PagerView>(null);
 
+    const { currentSchedule, fetchSchedule } = useScheduleStore();
     const [loading, setLoading] = useState(true);
+    const [weekData, setWeekData] = useState<WeekProp[]>([]);
 
     useEffect(() => {
         const loadData = async () => {
             try {
+                await fetchSchedule({});
                 setLoading(false);
             } catch (error) {
-                console.error('Failed to load data', error);
                 setLoading(false);
             }
         };
 
         loadData();
     }, []);
+
+    useEffect(() => {
+        if (currentSchedule) {
+            console.log('Current Schedule Raw:', JSON.stringify(currentSchedule, null, 2));
+            const transformedData = useScheduleStore.getState().transformScheduleToWeekData();
+            console.log('Transformed Data:', JSON.stringify(transformedData, null, 2));
+            
+            // Ensure we have a valid array of days
+            if (Array.isArray(transformedData) && transformedData.length > 0) {
+                setWeekData(transformedData);
+            } else {
+                console.error('No valid schedule data found');
+                setWeekData([]);
+            }
+        }
+    }, [currentSchedule]);
 
     if (loading) {
         return (
@@ -385,7 +101,7 @@ const App = () => {
     const handleDaySelect = (selectedDay: string) => {
         const normalizedSelectedDay = selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1);
 
-        const currentPageData = data[currentPageIndex];
+        const currentPageData = weekData[currentPageIndex];
         const currentPageDayIndex = currentPageData.days.findIndex(
             day => day.day.toLowerCase() === normalizedSelectedDay.toLowerCase()
         );
@@ -397,8 +113,8 @@ const App = () => {
                 dayIndex: currentPageDayIndex
             };
         } else {
-            for (let pageIndex = 0; pageIndex < data.length; pageIndex++) {
-                const dayIndex = data[pageIndex].days.findIndex(
+            for (let pageIndex = 0; pageIndex < weekData.length; pageIndex++) {
+                const dayIndex = weekData[pageIndex].days.findIndex(
                     day => day.day.toLowerCase() === normalizedSelectedDay.toLowerCase()
                 );
 
@@ -422,7 +138,7 @@ const App = () => {
                     const dayIndex = foundPage.dayIndex;
                     let dayOffset = 0;
                     for (let i = 0; i < dayIndex; i++) {
-                        const lessons = data[foundPage.pageIndex].days[i].lessons;
+                        const lessons = weekData[foundPage.pageIndex].days[i].lessons;
                         lessons.forEach((lesson) => {
                             dayOffset += 120;
                         });
@@ -437,6 +153,8 @@ const App = () => {
             }, 200);
         }
     };
+
+    const weekDays = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница'];
 
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -456,8 +174,7 @@ const App = () => {
                             horizontal={true}
                             scrollEventThrottle={20}
                         >
-                            {TEST_DATA.map((day, index) => {
-
+                            {weekDays.map((day, index) => {
                                 return (
                                     <TouchableOpacity
                                         key={index}
@@ -472,7 +189,7 @@ const App = () => {
                                                     borderRadius: 50,
                                                     overflow: 'hidden',
                                                     marginHorizontal: 3,
-                                                    marginRight: TEST_DATA.length - 1 === index ? 15 : 3,
+                                                    marginRight: weekDays.length - 1 === index ? 15 : 3,
                                                     marginLeft: index === 0 ? 10 : 3,
                                                     borderWidth: 1.5,
                                                     borderColor: 'transparent'
@@ -527,10 +244,12 @@ const App = () => {
                         setCurrentPageIndex(selectedPage);
                     }}
                 >
-                    {data.length === 0 ? (
-                        <Text>Нету данных о занятии</Text>
+                    {weekData.length === 0 ? (
+                        <View style={styles.page}>
+                            <Text style={styles.noDataText}>Нет данных о занятиях</Text>
+                        </View>
                     ) : (
-                        data.map((week, index) => {
+                        weekData.map((week, index) => {
                             return (
                                 <View style={styles.page} key={index}>
                                     <ScrollView
@@ -577,59 +296,18 @@ const styles = StyleSheet.create({
     },
     page: {
         flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
-    items: {
-        height: 100,
-        marginVertical: 5,
-        width: '95%',
-        marginHorizontal: 'auto',
-        backgroundColor: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
-        borderRadius: 25
-    },
-    contentContainer: {
-        flex: 1,
-        alignItems: 'center',
-    },
-    absolute: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+    noDataText: {
+        color: 'white',
+        fontSize: 18,
+        fontFamily: 'Poppins-Medium'
     },
     scrollViewStyle: {
         flex: 1,
         width: '100%',
         position: 'relative',
-    },
-    tabBarContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-    stickyButton: {
-        position: 'absolute',
-        bottom: 70,
-        alignSelf: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 25,
-        overflow: 'hidden',
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000,
-    },
-    buttonContent: {
-        flex: 1,
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
     },
     loadingContainer: {
         flex: 1,

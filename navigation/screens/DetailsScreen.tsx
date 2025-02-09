@@ -44,30 +44,47 @@ const App = () => {
             const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
             const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
             
-            // Загружаем текущую неделю
-            await fetchSchedule({
-                startDate: format(weekStart, 'yyyyMMdd'),
-                endDate: format(weekEnd, 'yyyyMMdd'),
-                isInitialLoad: true
-            });
+            try {
+                // Загружаем текущую неделю
+                await fetchSchedule({
+                    startDate: format(weekStart, 'yyyyMMdd'),
+                    endDate: format(weekEnd, 'yyyyMMdd'),
+                    isInitialLoad: true
+                });
 
-            // Загружаем предыдущую неделю
-            const prevWeekStart = startOfWeek(subDays(weekStart, 7), { weekStartsOn: 1 });
-            const prevWeekEnd = endOfWeek(subDays(weekStart, 7), { weekStartsOn: 1 });
-            await fetchSchedule({
-                startDate: format(prevWeekStart, 'yyyyMMdd'),
-                endDate: format(prevWeekEnd, 'yyyyMMdd'),
-                direction: 'prev'
-            });
+                // Загружаем предыдущую неделю
+                const prevWeekStart = startOfWeek(subDays(weekStart, 7), { weekStartsOn: 1 });
+                const prevWeekEnd = endOfWeek(subDays(weekStart, 7), { weekStartsOn: 1 });
+                await fetchSchedule({
+                    startDate: format(prevWeekStart, 'yyyyMMdd'),
+                    endDate: format(prevWeekEnd, 'yyyyMMdd'),
+                    direction: 'prev'
+                });
 
-            // Загружаем следующую неделю
-            const nextWeekStart = startOfWeek(addDays(weekEnd, 1), { weekStartsOn: 1 });
-            const nextWeekEnd = endOfWeek(addDays(weekEnd, 1), { weekStartsOn: 1 });
-            await fetchSchedule({
-                startDate: format(nextWeekStart, 'yyyyMMdd'),
-                endDate: format(nextWeekEnd, 'yyyyMMdd'),
-                direction: 'next'
-            });
+                // Загружаем следующую неделю
+                const nextWeekStart = startOfWeek(addDays(weekEnd, 1), { weekStartsOn: 1 });
+                const nextWeekEnd = endOfWeek(addDays(weekEnd, 1), { weekStartsOn: 1 });
+                await fetchSchedule({
+                    startDate: format(nextWeekStart, 'yyyyMMdd'),
+                    endDate: format(nextWeekEnd, 'yyyyMMdd'),
+                    direction: 'next'
+                });
+
+                // После загрузки всех данных обновляем видимые страницы
+                const allWeeks = getCachedWeeks();
+                if (allWeeks.length > 0) {
+                    const currentWeekIndex = allWeeks.findIndex(week => {
+                        const weekStartDate = week.week.startDate;
+                        return weekStartDate === format(weekStart, 'yyyyMMdd');
+                    });
+
+                    if (currentWeekIndex !== -1) {
+                        updateVisiblePages(currentWeekIndex);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            }
         };
 
         loadInitialData();
@@ -75,23 +92,28 @@ const App = () => {
 
     // Обновляем видимые страницы при изменении кэша
     useEffect(() => {
-        const allWeeks = getCachedWeeks();
-        if (allWeeks.length > 0) {
-            const currentWeekIndex = allWeeks.findIndex(week => {
-                const weekDate = new Date(week.week.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
-                const currentDate = startOfWeek(new Date(), { weekStartsOn: 1 });
-                return format(weekDate, 'yyyyMMdd') === format(currentDate, 'yyyyMMdd');
-            });
+        if (!isLoading) {
+            const allWeeks = getCachedWeeks();
+            if (allWeeks.length > 0) {
+                const currentWeekIndex = allWeeks.findIndex(week => {
+                    const weekStartDate = week.week.startDate;
+                    const currentDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+                    return weekStartDate === format(currentDate, 'yyyyMMdd');
+                });
 
-            if (currentWeekIndex !== -1) {
-                updateVisiblePages(currentWeekIndex);
+                if (currentWeekIndex !== -1) {
+                    updateVisiblePages(currentWeekIndex);
+                }
             }
         }
-    }, [getCachedWeeks]);
+    }, [getCachedWeeks, isLoading]);
 
     const updateVisiblePages = (centerIndex: number) => {
         const allWeeks = getCachedWeeks();
         if (allWeeks.length === 0) return;
+
+        console.log('Updating visible pages with center index:', centerIndex);
+        console.log('All weeks:', allWeeks);
 
         // Получаем три недели для отображения
         const weeksToShow = [];
@@ -101,13 +123,14 @@ const App = () => {
             }
         }
 
+        console.log('Weeks to show:', weeksToShow);
         setVisiblePages(weeksToShow);
 
         // Подгружаем следующую неделю если нужно
         const lastWeek = allWeeks[centerIndex + 1];
         if (lastWeek) {
             try {
-                const lastWeekDate = new Date(lastWeek.week.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+                const lastWeekDate = new Date(lastWeek.week.startDate.slice(0, 4) + '-' + lastWeek.week.startDate.slice(4, 6) + '-' + lastWeek.week.startDate.slice(6, 8));
                 const nextWeekStart = startOfWeek(addDays(lastWeekDate, 7), { weekStartsOn: 1 });
                 const nextWeekEnd = endOfWeek(addDays(lastWeekDate, 7), { weekStartsOn: 1 });
                 
@@ -127,7 +150,7 @@ const App = () => {
         const firstWeek = allWeeks[centerIndex - 1];
         if (firstWeek) {
             try {
-                const firstWeekDate = new Date(firstWeek.week.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+                const firstWeekDate = new Date(firstWeek.week.startDate.slice(0, 4) + '-' + firstWeek.week.startDate.slice(4, 6) + '-' + firstWeek.week.startDate.slice(6, 8));
                 const prevWeekStart = startOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
                 const prevWeekEnd = endOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
 
@@ -149,7 +172,7 @@ const App = () => {
         const allWeeks = getCachedWeeks();
         
         // Находим индекс текущей недели в общем массиве
-        const currentWeekIndex = allWeeks.findIndex(week => week.week === visiblePages[newIndex]?.week);
+        const currentWeekIndex = allWeeks.findIndex(week => week.week.startDate === visiblePages[newIndex]?.week.startDate);
         
         if (currentWeekIndex !== -1) {
             setCurrentPageIndex(newIndex);
@@ -159,6 +182,7 @@ const App = () => {
 
     const renderPage = (index: number) => {
         const weekData = visiblePages[index];
+        console.log('Rendering page with data:', weekData);
         if (!weekData) {
             return (
                 <View style={styles.loadingContainer}>
@@ -172,7 +196,7 @@ const App = () => {
                     key={weekData.id}
                     id={weekData.id}
                     week={weekData.week}
-                    days={weekData.days}
+                    days={weekData.days || []}
                 />
             </View>
         );
@@ -293,15 +317,15 @@ const styles = StyleSheet.create({
     },
     contentWrapper: {
         flex: 1,
-        position: 'relative',
     },
     pageContainer: {
         flex: 1,
+        width: '100%',
     },
     weekContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        width: '100%',
+        paddingTop: 10,
     },
     loadingContainer: {
         flex: 1,

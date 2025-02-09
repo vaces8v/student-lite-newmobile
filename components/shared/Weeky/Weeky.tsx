@@ -9,16 +9,17 @@ export interface WeekProp {
     onVisibleDayChange?: (day: string) => void;
 }
 
-const Weeky = ({ week, days, onVisibleDayChange }: WeekProp) => {
+const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
     const weekNumber = parseInt(week.slice(0, 4));
     const isEvenWeek = weekNumber % 2 === 0;
 
     return (
-        <View style={{ width: '100%', marginHorizontal: 'auto' }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={{ width: '100%', marginHorizontal: 'auto', marginBottom: 100 }}>
             <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', fontFamily: 'Poppins-Medium', textAlign: 'center', marginBottom: 10, marginTop: 5 }}>
-                {isEvenWeek ? 'Четная неделя' : 'Нечетная неделя'}
+                {isEvenWeek ? 'Четная неделя' : 'Нечетная неделя'} 
             </Text>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            
                 {days.map((item) => (
                     <Day
                         key={item.id}
@@ -28,9 +29,13 @@ const Weeky = ({ week, days, onVisibleDayChange }: WeekProp) => {
                         onVisibleDayChange={onVisibleDayChange}
                     />
                 ))}
-            </ScrollView>
+           
         </View>
+        </ScrollView>
     );
-};
+}, (prevProps, nextProps) => {
+    return prevProps.week === nextProps.week && 
+           prevProps.days.length === nextProps.days.length;
+});
 
 export default Weeky;

@@ -20,72 +20,165 @@ import Weeky, { WeekProp } from '@/components/shared/Weeky/Weeky';
 import { useScheduleStore } from '@/store/api/schedule.store';
 import { useTokenStore } from '@/store/api/token.store';
 import { useNavigation } from '@react-navigation/native';
+import { addDays, format, subDays, startOfWeek, endOfWeek } from 'date-fns';
 
 const App = () => {
     const headerHeight = useHeaderHeight();
     const navigation = useNavigation();
-    const { studentId, fetchStudentId } = useScheduleStore();
-    const { token } = useTokenStore.getState();
+    const [visiblePages, setVisiblePages] = useState<WeekProp[]>([]);
+    const [currentPageIndex, setCurrentPageIndex] = useState(1);
+    const pagerViewRef = useRef(null);
+    
+    const { 
+        fetchSchedule, 
+        getCachedWeeks,
+        isWeekCached,
+        currentSchedule,
+        isLoading 
+    } = useScheduleStore();
 
+    // Загрузка начальных данных
     useEffect(() => {
-        const initializeStudentId = async () => {
-            if (!token) {
-                //@ts-ignore
-                navigation.navigate('Home');
-                return;
-            }
+        const loadInitialData = async () => {
+            const currentDate = new Date();
+            const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+            const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+            
+            // Загружаем текущую неделю
+            await fetchSchedule({
+                startDate: format(weekStart, 'yyyyMMdd'),
+                endDate: format(weekEnd, 'yyyyMMdd'),
+                isInitialLoad: true
+            });
 
-            try {
-                const id = await fetchStudentId();
-                if (!id) {
-                    console.error('Failed to fetch student ID')
-                }
-            } catch (error) {
-                
-            }
+            // Загружаем предыдущую неделю
+            const prevWeekStart = startOfWeek(subDays(weekStart, 7), { weekStartsOn: 1 });
+            const prevWeekEnd = endOfWeek(subDays(weekStart, 7), { weekStartsOn: 1 });
+            await fetchSchedule({
+                startDate: format(prevWeekStart, 'yyyyMMdd'),
+                endDate: format(prevWeekEnd, 'yyyyMMdd'),
+                direction: 'prev'
+            });
+
+            // Загружаем следующую неделю
+            const nextWeekStart = startOfWeek(addDays(weekEnd, 1), { weekStartsOn: 1 });
+            const nextWeekEnd = endOfWeek(addDays(weekEnd, 1), { weekStartsOn: 1 });
+            await fetchSchedule({
+                startDate: format(nextWeekStart, 'yyyyMMdd'),
+                endDate: format(nextWeekEnd, 'yyyyMMdd'),
+                direction: 'next'
+            });
         };
 
-        initializeStudentId();
-    }, [token, fetchStudentId, navigation]);
-
-    const [currentPageIndex, setCurrentPageIndex] = useState(0);
-    const scrollViewRefs = useRef<ScrollView[]>([]);
-    const pagerViewRef = useRef<PagerView>(null);
-
-    const { currentSchedule, fetchSchedule } = useScheduleStore();
-    const [loading, setLoading] = useState(true);
-    const [weekData, setWeekData] = useState<WeekProp[]>([]);
-
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                await fetchSchedule({});
-                setLoading(false);
-            } catch (error) {
-                setLoading(false);
-            }
-        };
-
-        loadData();
+        loadInitialData();
     }, []);
 
+    // Обновляем видимые страницы при изменении кэша
     useEffect(() => {
-        if (currentSchedule) {
-            console.log('Current Schedule Raw:', JSON.stringify(currentSchedule, null, 2));
-            const transformedData = useScheduleStore.getState().transformScheduleToWeekData();
-            console.log('Transformed Data:', JSON.stringify(transformedData, null, 2));
-            
-            // Ensure we have a valid array of days
-            if (Array.isArray(transformedData) && transformedData.length > 0) {
-                setWeekData(transformedData);
-            } else {
-                console.error('No valid schedule data found');
-                setWeekData([]);
+        const allWeeks = getCachedWeeks();
+        if (allWeeks.length > 0) {
+            const currentWeekIndex = allWeeks.findIndex(week => {
+                const weekDate = new Date(week.week.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+                const currentDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+                return format(weekDate, 'yyyyMMdd') === format(currentDate, 'yyyyMMdd');
+            });
+
+            if (currentWeekIndex !== -1) {
+                updateVisiblePages(currentWeekIndex);
             }
         }
-    }, [currentSchedule]);
+    }, [getCachedWeeks]);
 
-    if (loading) {
+    const updateVisiblePages = (centerIndex: number) => {
+        const allWeeks = getCachedWeeks();
+        if (allWeeks.length === 0) return;
+
+        // Получаем три недели для отображения
+        const weeksToShow = [];
+        for (let i = centerIndex - 1; i <= centerIndex + 1; i++) {
+            if (i >= 0 && i < allWeeks.length) {
+                weeksToShow.push(allWeeks[i]);
+            }
+        }
+
+        setVisiblePages(weeksToShow);
+
+        // Подгружаем следующую неделю если нужно
+        const lastWeek = allWeeks[centerIndex + 1];
+        if (lastWeek) {
+            try {
+                const lastWeekDate = new Date(lastWeek.week.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+                const nextWeekStart = startOfWeek(addDays(lastWeekDate, 7), { weekStartsOn: 1 });
+                const nextWeekEnd = endOfWeek(addDays(lastWeekDate, 7), { weekStartsOn: 1 });
+                
+                if (!isWeekCached(format(nextWeekStart, 'yyyyMMdd'))) {
+                    fetchSchedule({
+                        startDate: format(nextWeekStart, 'yyyyMMdd'),
+                        endDate: format(nextWeekEnd, 'yyyyMMdd'),
+                        direction: 'next'
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading next week:', error);
+            }
+        }
+
+        // Подгружаем предыдущую неделю если нужно
+        const firstWeek = allWeeks[centerIndex - 1];
+        if (firstWeek) {
+            try {
+                const firstWeekDate = new Date(firstWeek.week.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+                const prevWeekStart = startOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
+                const prevWeekEnd = endOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
+
+                if (!isWeekCached(format(prevWeekStart, 'yyyyMMdd'))) {
+                    fetchSchedule({
+                        startDate: format(prevWeekStart, 'yyyyMMdd'),
+                        endDate: format(prevWeekEnd, 'yyyyMMdd'),
+                        direction: 'prev'
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading prev week:', error);
+            }
+        }
+    };
+
+    const handlePageSelected = (e: any) => {
+        const newIndex = e.nativeEvent.position;
+        const allWeeks = getCachedWeeks();
+        
+        // Находим индекс текущей недели в общем массиве
+        const currentWeekIndex = allWeeks.findIndex(week => week.week === visiblePages[newIndex]?.week);
+        
+        if (currentWeekIndex !== -1) {
+            setCurrentPageIndex(newIndex);
+            updateVisiblePages(currentWeekIndex);
+        }
+    };
+
+    const renderPage = (index: number) => {
+        const weekData = visiblePages[index];
+        if (!weekData) {
+            return (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#462ab2" />
+                </View>
+            );
+        }
+        return (
+            <View style={styles.weekContainer}>
+                <Weeky
+                    key={weekData.id}
+                    id={weekData.id}
+                    week={weekData.week}
+                    days={weekData.days}
+                />
+            </View>
+        );
+    };
+
+    if (isLoading) {
         return (
             <LinearGradient
                 colors={['#462ab2', '#1e124c']}
@@ -98,63 +191,7 @@ const App = () => {
         );
     }
 
-    const handleDaySelect = (selectedDay: string) => {
-        const normalizedSelectedDay = selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1);
-
-        const currentPageData = weekData[currentPageIndex];
-        const currentPageDayIndex = currentPageData.days.findIndex(
-            day => day.day.toLowerCase() === normalizedSelectedDay.toLowerCase()
-        );
-
-        let foundPage = null;
-        if (currentPageDayIndex !== -1) {
-            foundPage = {
-                pageIndex: currentPageIndex,
-                dayIndex: currentPageDayIndex
-            };
-        } else {
-            for (let pageIndex = 0; pageIndex < weekData.length; pageIndex++) {
-                const dayIndex = weekData[pageIndex].days.findIndex(
-                    day => day.day.toLowerCase() === normalizedSelectedDay.toLowerCase()
-                );
-
-                if (dayIndex !== -1) {
-                    foundPage = {
-                        pageIndex,
-                        dayIndex
-                    };
-                    break;
-                }
-            }
-        }
-
-        if (foundPage) {
-            if (foundPage.pageIndex !== currentPageIndex && pagerViewRef.current) {
-                pagerViewRef.current.setPage(foundPage.pageIndex);
-            }
-
-            setTimeout(() => {
-                if (scrollViewRefs.current[foundPage.pageIndex]) {
-                    const dayIndex = foundPage.dayIndex;
-                    let dayOffset = 0;
-                    for (let i = 0; i < dayIndex; i++) {
-                        const lessons = weekData[foundPage.pageIndex].days[i].lessons;
-                        lessons.forEach((lesson) => {
-                            dayOffset += 120;
-                        });
-                        dayOffset += 70;
-                    }
-
-                    scrollViewRefs.current[foundPage.pageIndex].scrollTo({
-                        y: dayOffset,
-                        animated: true
-                    });
-                }
-            }, 200);
-        }
-    };
-
-    const weekDays = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница'];
+    const weekDays = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
 
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -178,7 +215,7 @@ const App = () => {
                                 return (
                                     <TouchableOpacity
                                         key={index}
-                                        onPress={() => handleDaySelect(day)}
+                                        onPress={() => console.log(day)}
                                         style={{ height: 50, overflow: 'visible' }}
                                     >
                                         <View
@@ -225,48 +262,20 @@ const App = () => {
                                 );
                             })}
                         </ScrollView>
-                        <LinearGradient
-                            colors={['transparent', 'rgba(70, 42, 178, 0.8)', '#462ab2']}
-                            start={{ x: 0.5, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            style={styles.fadeOverlay}
-                            pointerEvents="none"
-                        />
                     </View>
                     <DatePicker />
                 </View>
                 <PagerView
                     ref={pagerViewRef}
-                    initialPage={0}
                     style={styles.contentWrapper}
-                    onPageSelected={(e) => {
-                        const selectedPage = e.nativeEvent.position;
-                        setCurrentPageIndex(selectedPage);
-                    }}
+                    initialPage={1}
+                    onPageSelected={handlePageSelected}
                 >
-                    {weekData.length === 0 ? (
-                        <View style={styles.page}>
-                            <Text style={styles.noDataText}>Нет данных о занятиях</Text>
+                    {visiblePages.map((weekData, index) => (
+                        <View key={weekData?.id || index} style={styles.pageContainer}>
+                            {renderPage(index)}
                         </View>
-                    ) : (
-                        weekData.map((week, index) => {
-                            return (
-                                <View style={styles.page} key={index}>
-                                    <ScrollView
-                                        ref={(ref: ScrollView) => scrollViewRefs.current[index] = ref}
-                                        showsVerticalScrollIndicator={false}
-                                        style={[styles.scrollViewStyle]}
-                                        contentContainerStyle={{ paddingBottom: headerHeight + headerHeight / 3.1 - 10 }}
-                                    >
-                                        <Weeky
-                                            id={week.id}
-                                            week={week.week}
-                                            days={week.days} />
-                                    </ScrollView>
-                                </View>
-                            );
-                        })
-                    )}
+                    ))}
                 </PagerView>
             </LinearGradient>
         </GestureHandlerRootView>
@@ -282,38 +291,23 @@ const styles = StyleSheet.create({
         position: 'relative',
         marginRight: 50,
     },
-    fadeOverlay: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        width: 80,
-        height: 42
-    },
     contentWrapper: {
         flex: 1,
         position: 'relative',
     },
-    page: {
+    pageContainer: {
+        flex: 1,
+    },
+    weekContainer: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
-    },
-    noDataText: {
-        color: 'white',
-        fontSize: 18,
-        fontFamily: 'Poppins-Medium'
-    },
-    scrollViewStyle: {
-        flex: 1,
-        width: '100%',
-        position: 'relative',
+        alignItems: 'center',
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
-    }
+    },
 });
 
 export default App;

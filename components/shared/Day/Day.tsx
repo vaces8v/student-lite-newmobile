@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
 import Lesson, { LessonProp } from "../Lesson/Lesson";
+import { format, parse } from "date-fns";
 
 export interface DayProp {
     id: number;
@@ -26,7 +27,8 @@ const Day = React.memo(({ day, lessons, onVisibleDayChange }: DayProp) => {
                 marginBottom: 2,
                 fontWeight: 'bold',
                 fontFamily: 'Poppins-Medium',
-                textAlign: 'center'
+                textAlign: 'center',
+                borderBottomLeftRadius: 100,
             }}>
                 {day}
             </Text>
@@ -34,7 +36,7 @@ const Day = React.memo(({ day, lessons, onVisibleDayChange }: DayProp) => {
                 {lessons.length > 0 ? 
                     lessons.map((lesson) => (
                         <Lesson
-                            key={lesson.id} 
+                            key={lesson.id}
                             id={lesson.id}
                             timeStart={lesson.timeStart}
                             timeEnd={lesson.timeEnd}
@@ -54,6 +56,9 @@ const Day = React.memo(({ day, lessons, onVisibleDayChange }: DayProp) => {
             </View>
         </View>
     );
+}, (prevProps, nextProps) => {
+    return prevProps.day === nextProps.day && 
+           prevProps.lessons.length === nextProps.lessons.length;
 });
 
 export default Day;

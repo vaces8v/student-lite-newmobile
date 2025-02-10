@@ -42,8 +42,11 @@ const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
     console.log('Weeky rendering with days:', days);
 
     return (
-        <View style={{ flex: 1, width: '100%' }}>
-            <View style={{ alignItems: 'center', marginBottom: 10, marginTop: 5 }}>
+        <ScrollView 
+        contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 0 }}
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 1, width: '100%' }}>
+            <View style={{ alignItems: 'center', marginBottom: 0, marginTop: 5 }}>
                 <Text style={{ 
                     color: 'white', 
                     fontSize: 24, 
@@ -64,11 +67,7 @@ const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
                 </Text>
             </View>
             
-            <ScrollView 
-                style={{ flex: 1, width: '100%' }}
-                contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 20 }}
-                showsVerticalScrollIndicator={false}
-            >
+            <View style={{ flex: 1, width: '100%' }}>
                 {Array.isArray(days) && days.map((item) => (
                     <Day
                         key={item.id}
@@ -79,8 +78,8 @@ const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
                         onVisibleDayChange={onVisibleDayChange}
                     />
                 ))}
-            </ScrollView>
-        </View>
+            </View>
+        </ScrollView>
     );
 }, (prevProps, nextProps) => {
     return prevProps.week === nextProps.week && 

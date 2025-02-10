@@ -40,43 +40,23 @@ const App = () => {
     // Загрузка начальных данных
     useEffect(() => {
         const loadInitialData = async () => {
-            const currentDate = new Date();
-            const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-            const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
-            
             try {
-                // Загружаем текущую неделю
+                // Загружаем текущую, предыдущую и следующую недели одновременно
                 await fetchSchedule({
-                    startDate: format(weekStart, 'yyyyMMdd'),
-                    endDate: format(weekEnd, 'yyyyMMdd'),
                     isInitialLoad: true
-                });
-
-                // Загружаем предыдущую неделю
-                const prevWeekStart = startOfWeek(subDays(weekStart, 7), { weekStartsOn: 1 });
-                const prevWeekEnd = endOfWeek(subDays(weekStart, 7), { weekStartsOn: 1 });
-                await fetchSchedule({
-                    startDate: format(prevWeekStart, 'yyyyMMdd'),
-                    endDate: format(prevWeekEnd, 'yyyyMMdd'),
-                    direction: 'prev'
-                });
-
-                // Загружаем следующую неделю
-                const nextWeekStart = startOfWeek(addDays(weekEnd, 1), { weekStartsOn: 1 });
-                const nextWeekEnd = endOfWeek(addDays(weekEnd, 1), { weekStartsOn: 1 });
-                await fetchSchedule({
-                    startDate: format(nextWeekStart, 'yyyyMMdd'),
-                    endDate: format(nextWeekEnd, 'yyyyMMdd'),
-                    direction: 'next'
                 });
 
                 // После загрузки всех данных обновляем видимые страницы
                 const allWeeks = getCachedWeeks();
                 if (allWeeks.length > 0) {
-                    const currentWeekIndex = allWeeks.findIndex(week => {
-                        const weekStartDate = week.week.startDate;
-                        return weekStartDate === format(weekStart, 'yyyyMMdd');
-                    });
+                    const currentDate = new Date();
+                    const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+                    const currentWeekKey = format(currentWeekStart, 'yyyyMMdd');
+                    
+                    const currentWeekIndex = allWeeks.findIndex(week => week.week === currentWeekKey);
+                    console.log('Current week key:', currentWeekKey);
+                    console.log('Available weeks:', allWeeks.map(w => w.week));
+                    console.log('Found week index:', currentWeekIndex);
 
                     if (currentWeekIndex !== -1) {
                         updateVisiblePages(currentWeekIndex);
@@ -95,11 +75,11 @@ const App = () => {
         if (!isLoading) {
             const allWeeks = getCachedWeeks();
             if (allWeeks.length > 0) {
-                const currentWeekIndex = allWeeks.findIndex(week => {
-                    const weekStartDate = week.week.startDate;
-                    const currentDate = startOfWeek(new Date(), { weekStartsOn: 1 });
-                    return weekStartDate === format(currentDate, 'yyyyMMdd');
-                });
+                const currentDate = new Date();
+                const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+                const currentWeekKey = format(currentWeekStart, 'yyyyMMdd');
+                
+                const currentWeekIndex = allWeeks.findIndex(week => week.week === currentWeekKey);
 
                 if (currentWeekIndex !== -1) {
                     updateVisiblePages(currentWeekIndex);
@@ -130,7 +110,11 @@ const App = () => {
         const lastWeek = allWeeks[centerIndex + 1];
         if (lastWeek) {
             try {
-                const lastWeekDate = new Date(lastWeek.week.startDate.slice(0, 4) + '-' + lastWeek.week.startDate.slice(4, 6) + '-' + lastWeek.week.startDate.slice(6, 8));
+                const lastWeekDate = new Date(
+                    lastWeek.week.slice(0, 4) + '-' + 
+                    lastWeek.week.slice(4, 6) + '-' + 
+                    lastWeek.week.slice(6, 8)
+                );
                 const nextWeekStart = startOfWeek(addDays(lastWeekDate, 7), { weekStartsOn: 1 });
                 const nextWeekEnd = endOfWeek(addDays(lastWeekDate, 7), { weekStartsOn: 1 });
                 
@@ -150,7 +134,11 @@ const App = () => {
         const firstWeek = allWeeks[centerIndex - 1];
         if (firstWeek) {
             try {
-                const firstWeekDate = new Date(firstWeek.week.startDate.slice(0, 4) + '-' + firstWeek.week.startDate.slice(4, 6) + '-' + firstWeek.week.startDate.slice(6, 8));
+                const firstWeekDate = new Date(
+                    firstWeek.week.slice(0, 4) + '-' + 
+                    firstWeek.week.slice(4, 6) + '-' + 
+                    firstWeek.week.slice(6, 8)
+                );
                 const prevWeekStart = startOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
                 const prevWeekEnd = endOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
 
@@ -172,7 +160,7 @@ const App = () => {
         const allWeeks = getCachedWeeks();
         
         // Находим индекс текущей недели в общем массиве
-        const currentWeekIndex = allWeeks.findIndex(week => week.week.startDate === visiblePages[newIndex]?.week.startDate);
+        const currentWeekIndex = allWeeks.findIndex(week => week.week === visiblePages[newIndex]?.week);
         
         if (currentWeekIndex !== -1) {
             setCurrentPageIndex(newIndex);
@@ -226,8 +214,8 @@ const App = () => {
                     <View style={styles.scrollViewContainer}>
                         <ScrollView
                             style={{
-                                height: 50,
-                                maxHeight: 43,
+                                height: 40,
+                                maxHeight: 42,
                                 flex: 1,
                                 width: '100%',
                             }}
@@ -317,6 +305,7 @@ const styles = StyleSheet.create({
     },
     contentWrapper: {
         flex: 1,
+        paddingBottom: 80
     },
     pageContainer: {
         flex: 1,

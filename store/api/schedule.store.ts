@@ -95,10 +95,16 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 				
 				// If no dates provided for initial load, use current week
 				if (!params.startDate || !params.endDate) {
+					// Используем текущее системное время
 					const currentDate = new Date();
-					const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-					params.startDate = format(weekStart, 'yyyyMMdd');
-					params.endDate = format(endOfWeek(weekStart, { weekStartsOn: 1 }), 'yyyyMMdd');
+					
+					// Явно указываем, что неделя начинается с понедельника
+					const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+					const prevWeekStart = subDays(currentWeekStart, 7);
+					const nextWeekStart = addDays(currentWeekStart, 7);
+					
+					params.startDate = format(prevWeekStart, 'yyyyMMdd');
+					params.endDate = format(endOfWeek(nextWeekStart, { weekStartsOn: 1 }), 'yyyyMMdd');
 				}
 			}
 
@@ -178,17 +184,35 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 
 	prefetchNextWeek: async () => {
 		const state = get();
-		const currentDate = new Date();
-		const nextWeekDate = addDays(currentDate, 7);
-		const nextWeekStart = startOfWeek(nextWeekDate, { weekStartsOn: 1 });
-		const nextWeekEnd = endOfWeek(nextWeekDate, { weekStartsOn: 1 });
+		const currentWeeks = state.getCachedWeeks();
+		let nextWeekStart, nextWeekEnd;
 
-		// Prefetch next week's data
-		state.fetchSchedule({
-			startDate: format(nextWeekStart, 'yyyyMMdd'),
-			endDate: format(nextWeekEnd, 'yyyyMMdd'),
-			direction: 'next'
-		});
+		if (currentWeeks.length > 0) {
+			// Get the last week in the cache and calculate the next week
+			const latestWeek = currentWeeks[currentWeeks.length - 1];
+			const latestWeekDate = new Date(
+				latestWeek.week.slice(0, 4) + '-' + 
+				latestWeek.week.slice(4, 6) + '-' + 
+				latestWeek.week.slice(6, 8)
+			);
+			nextWeekStart = startOfWeek(addDays(latestWeekDate, 7), { weekStartsOn: 1 });
+			nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
+		} else {
+			// If no weeks are cached, use the current week
+			const currentDate = new Date();
+			nextWeekStart = startOfWeek(addDays(currentDate, 7), { weekStartsOn: 1 });
+			nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
+		}
+
+		// Only prefetch if the next week is not already cached
+		const nextWeekKey = format(nextWeekStart, 'yyyyMMdd');
+		if (!state.isWeekCached(nextWeekKey)) {
+			await state.fetchSchedule({
+				startDate: format(nextWeekStart, 'yyyyMMdd'),
+				endDate: format(nextWeekEnd, 'yyyyMMdd'),
+				direction: 'next'
+			});
+		}
 	},
 
 	transformScheduleToWeekData: (schedule: ScheduleResponse) => {
@@ -214,53 +238,64 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 		const dates = Object.keys(studentSchedule.days).sort();
 		if (dates.length === 0) return [];
 
-		// Use the first date of the week as the week identifier
-		const weekStartDate = dates[0];
-		const currentDate = new Date();
-		const currentWeekStart = format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'yyyyMMdd');
+		// Group dates by week
+		const weekMap = new Map<string, string[]>();
+		dates.forEach(date => {
+			const weekStart = format(startOfWeek(new Date(
+				date.slice(0, 4) + '-' + 
+				date.slice(4, 6) + '-' + 
+				date.slice(6, 8)
+			), { weekStartsOn: 1 }), 'yyyyMMdd');
+			
+			if (!weekMap.has(weekStart)) {
+				weekMap.set(weekStart, []);
+			}
+			weekMap.get(weekStart)?.push(date);
+		});
 
-		// Transform days into week data matching WeekProp interface
-		const weekData = {
-			id: parseInt(weekStartDate),
-			week: weekStartDate,
-			days: Object.entries(studentSchedule.days)
-				.sort(([dateA], [dateB]) => parseInt(dateA) - parseInt(dateB))
-				.map(([dateStr, dayData]) => ({
-					id: parseInt(dateStr),
-					day: dayData.title || '',
-					lessons: Object.entries(dayData.items || {})
-						.sort(([numA], [numB]) => parseInt(numA) - parseInt(numB))
-						.map(([lessonNum, lesson]) => {
-							// Process assessments
-							const assessments = lesson.assessments ?
-								lesson.assessments.map(assessment => ({
-									value: assessment.value || '',
-									comment: assessment.comment || 'Работа на уроке',
-									date: assessment.date,
-									lessonId: assessment.lesson_id
-								})) :
-								[{ value: '', comment: 'Работа на уроке', date: '', lessonId: '' }];
+		// Transform each week's data
+		return Array.from(weekMap.entries()).map(([weekStart, weekDates]) => ({
+			id: parseInt(weekStart),
+			week: weekStart,
+			days: weekDates
+				.sort()
+				.map(dateStr => {
+					const dayData = studentSchedule.days[dateStr];
+					return {
+						id: parseInt(dateStr),
+						day: dayData.title || '',
+						lessons: Object.entries(dayData.items || {})
+							.sort(([numA], [numB]) => parseInt(numA) - parseInt(numB))
+							.map(([lessonNum, lesson]) => {
+								// Process assessments
+								const assessments = lesson.assessments ?
+									lesson.assessments.map(assessment => ({
+										value: assessment.value || '',
+										comment: assessment.comment || 'Работа на уроке',
+										date: assessment.date,
+										lessonId: assessment.lesson_id
+									})) :
+									[{ value: '', comment: 'Работа на уроке', date: '', lessonId: '' }];
 
-							return {
-								id: parseInt(lessonNum),
-								timeStart: lesson.starttime || '',
-								timeEnd: lesson.endtime || '',
-								office: lesson.room || '',
-								theme: lesson.topic || '',
-								lesson: lesson.name || '',
-								estimation: assessments.map(a => a.value),
-								estimationComments: assessments.map(a => a.comment).filter(c => c !== 'Работа на уроке'),
-								homework: lesson.homework ?
-									Object.values(lesson.homework).map(hw => hw.value || '') :
-									[],
-								files: lesson.files || [],
-								teacher: lesson.teacher || ''
-							};
-						})
-				}))
-		};
-
-		return [weekData];
+								return {
+									id: parseInt(lessonNum),
+									timeStart: lesson.starttime || '',
+									timeEnd: lesson.endtime || '',
+									office: lesson.room || '',
+									theme: lesson.topic || '',
+									lesson: lesson.name || '',
+									estimation: assessments.map(a => a.value),
+									estimationComments: assessments.map(a => a.comment).filter(c => c !== 'Работа на уроке'),
+									homework: lesson.homework ?
+										Object.values(lesson.homework).map(hw => hw.value || '') :
+										[],
+									files: lesson.files || [],
+									teacher: lesson.teacher || ''
+								};
+							})
+					};
+				})
+		}));
 	},
 
 	getCachedWeeks: () => {

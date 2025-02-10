@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View, ActivityIndicator } from "react-native";
 import Day, { DayProp } from "../Day/Day";
 
 export interface WeekProp {
@@ -15,27 +15,54 @@ const getWeek = (date: Date, options: { weekStartsOn: number }) => {
 }
 
 const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
+    if (!week) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="white" />
+            </View>
+        );
+    }
+
     // Получаем дату первого дня недели
-    const weekDate = new Date(week.slice(0, 4) + '-' + week.slice(4, 6) + '-' + week.slice(6, 8));
+    const weekDate = week ? new Date(week.slice(0, 4) + '-' + week.slice(4, 6) + '-' + week.slice(6, 8)) : new Date();
     // Получаем номер недели в году
     const weekNumber = getWeek(weekDate, { weekStartsOn: 1 });
     const isEvenWeek = weekNumber % 2 === 0;
+
+    // Форматируем период недели
+    const weekEndDate = new Date(weekDate);
+    weekEndDate.setDate(weekDate.getDate() + 6);
+    const formatDate = (date: Date) => {
+        const day = date.getDate();
+        const month = date.toLocaleString('ru-RU', { month: 'long' });
+        return `${day} ${month}`;
+    };
+    const weekPeriod = `${formatDate(weekDate)} - ${formatDate(weekEndDate)}`;
 
     console.log('Weeky rendering with days:', days);
 
     return (
         <View style={{ flex: 1, width: '100%' }}>
-            <Text style={{ 
-                color: 'white', 
-                fontSize: 24, 
-                fontWeight: 'bold', 
-                fontFamily: 'Poppins-Medium', 
-                textAlign: 'center', 
-                marginBottom: 10, 
-                marginTop: 5 
-            }}>
-                {isEvenWeek ? 'Четная неделя' : 'Нечетная неделя'} 
-            </Text>
+            <View style={{ alignItems: 'center', marginBottom: 10, marginTop: 5 }}>
+                <Text style={{ 
+                    color: 'white', 
+                    fontSize: 24, 
+                    fontWeight: 'bold', 
+                    fontFamily: 'Poppins-Medium', 
+                    textAlign: 'center'
+                }}>
+                    {isEvenWeek ? 'Четная неделя' : 'Нечетная неделя'}
+                </Text>
+                <Text style={{ 
+                    color: 'white', 
+                    fontSize: 16, 
+                    fontFamily: 'Poppins-Regular', 
+                    textAlign: 'center',
+                    marginTop: 5
+                }}>
+                    {weekPeriod}
+                </Text>
+            </View>
             
             <ScrollView 
                 style={{ flex: 1, width: '100%' }}

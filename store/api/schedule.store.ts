@@ -92,6 +92,39 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 			// Only show loading indicator for initial load
 			if (params.isInitialLoad) {
 				set({ isLoading: true });
+				
+				// If no dates provided for initial load, use current week
+				if (!params.startDate || !params.endDate) {
+					const currentDate = new Date();
+					const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+					params.startDate = format(weekStart, 'yyyyMMdd');
+					params.endDate = format(endOfWeek(weekStart, { weekStartsOn: 1 }), 'yyyyMMdd');
+				}
+			}
+
+			// Adjust dates based on direction if not provided
+			if (!params.startDate || !params.endDate) {
+				const currentWeeks = state.getCachedWeeks();
+				let referenceDate;
+
+				if (currentWeeks.length > 0) {
+					const latestWeek = currentWeeks[currentWeeks.length - 1];
+					const earliestWeek = currentWeeks[0];
+					
+					if (params.direction === 'next') {
+						referenceDate = new Date(latestWeek.week.slice(0, 4) + '-' + latestWeek.week.slice(4, 6) + '-' + latestWeek.week.slice(6, 8));
+						referenceDate.setDate(referenceDate.getDate() + 7);
+					} else if (params.direction === 'prev') {
+						referenceDate = new Date(earliestWeek.week.slice(0, 4) + '-' + earliestWeek.week.slice(4, 6) + '-' + earliestWeek.week.slice(6, 8));
+						referenceDate.setDate(referenceDate.getDate() - 7);
+					}
+
+					if (referenceDate) {
+						const weekStart = startOfWeek(referenceDate, { weekStartsOn: 1 });
+						params.startDate = format(weekStart, 'yyyyMMdd');
+						params.endDate = format(endOfWeek(weekStart, { weekStartsOn: 1 }), 'yyyyMMdd');
+					}
+				}
 			}
 
 			state.pendingRequests.add(requestKey);
@@ -183,6 +216,8 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 
 		// Use the first date of the week as the week identifier
 		const weekStartDate = dates[0];
+		const currentDate = new Date();
+		const currentWeekStart = format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'yyyyMMdd');
 
 		// Transform days into week data matching WeekProp interface
 		const weekData = {
@@ -230,9 +265,13 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 
 	getCachedWeeks: () => {
 		const { cachedWeeks } = get();
-		return Array.from(cachedWeeks.values()).sort((a, b) =>
-			new Date(a.week).getTime() - new Date(b.week).getTime()
-		);
+		// Sort weeks by their date in ascending order
+		return Array.from(cachedWeeks.values())
+			.sort((a, b) => {
+				const dateA = new Date(a.week.slice(0, 4) + '-' + a.week.slice(4, 6) + '-' + a.week.slice(6, 8));
+				const dateB = new Date(b.week.slice(0, 4) + '-' + b.week.slice(4, 6) + '-' + b.week.slice(6, 8));
+				return dateA.getTime() - dateB.getTime();
+			});
 	},
 
 	clearCache: () => {

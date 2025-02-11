@@ -6,7 +6,8 @@ import {
     View,
     TouchableOpacity,
     ActivityIndicator,
-    RefreshControl
+    RefreshControl,
+    Modal
 } from 'react-native';
 import {
     GestureHandlerRootView,
@@ -29,6 +30,7 @@ const App = () => {
     const [visiblePages, setVisiblePages] = useState<WeekProp[]>([]);
     const [currentPageIndex, setCurrentPageIndex] = useState(1);
     const [refreshing, setRefreshing] = useState(false);
+    const [loadingAdditionalWeeks, setLoadingAdditionalWeeks] = useState(false);
     const pagerViewRef = useRef(null);
     
     const { 
@@ -118,14 +120,16 @@ const App = () => {
                 const nextWeekEnd = endOfWeek(addDays(lastWeekDate, 7), { weekStartsOn: 1 });
                 
                 if (!isWeekCached(format(nextWeekStart, 'yyyyMMdd'))) {
+                    setLoadingAdditionalWeeks(true);
                     fetchSchedule({
                         startDate: format(nextWeekStart, 'yyyyMMdd'),
                         endDate: format(nextWeekEnd, 'yyyyMMdd'),
                         direction: 'next'
-                    });
+                    }).finally(() => setLoadingAdditionalWeeks(false));
                 }
             } catch (error) {
                 console.error('Error loading next week:', error);
+                setLoadingAdditionalWeeks(false);
             }
         }
     
@@ -142,14 +146,16 @@ const App = () => {
                 const prevWeekEnd = endOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
     
                 if (!isWeekCached(format(prevWeekStart, 'yyyyMMdd'))) {
+                    setLoadingAdditionalWeeks(true);
                     fetchSchedule({
                         startDate: format(prevWeekStart, 'yyyyMMdd'),
                         endDate: format(prevWeekEnd, 'yyyyMMdd'),
                         direction: 'prev'
-                    });
+                    }).finally(() => setLoadingAdditionalWeeks(false));
                 }
             } catch (error) {
                 console.error('Error loading prev week:', error);
+                setLoadingAdditionalWeeks(false);
             }
         }
     };
@@ -185,6 +191,7 @@ const App = () => {
             // Fetch previous and next weeks if not cached
             const currentWeekIndex = allWeeks.findIndex(week => week.week === currentWeekKey);
             if (currentWeekIndex !== -1) {
+                setLoadingAdditionalWeeks(true);
                 // Fetch previous week if not cached
                 const prevWeekStart = startOfWeek(subDays(currentDate, 7), { weekStartsOn: 1 });
                 const prevWeekKey = format(prevWeekStart, 'yyyyMMdd');
@@ -210,7 +217,8 @@ const App = () => {
         } catch (error) {
             console.error('Error refreshing data:', error);
         } finally {
-            setRefreshing(false); 
+            setRefreshing(false);
+            setLoadingAdditionalWeeks(false);
         }
     }, []);
 
@@ -258,6 +266,11 @@ const App = () => {
             <LinearGradient
                 colors={['#462ab2', '#1e124c']}
                 style={styles.container}>
+                {loadingAdditionalWeeks && (
+                    <View style={styles.smallLoadingIndicator}>
+                        <ActivityIndicator size="small" color="white" />
+                    </View>
+                )}
                 <View style={{ position: 'relative', display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%', flex: 1 / 12, height: 43 }}>
                     <View style={styles.scrollViewContainer}>
                         <ScrollView
@@ -368,6 +381,12 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    smallLoadingIndicator: {
+        position: 'absolute',
+        top: 60,
+        right: 10,
+        zIndex: 1000
     },
 });
 

@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
     ScrollView,
     StyleSheet,
     Text,
     View,
     TouchableOpacity,
-    ActivityIndicator
+    ActivityIndicator,
+    RefreshControl
 } from 'react-native';
 import {
     GestureHandlerRootView,
@@ -27,6 +28,7 @@ const App = () => {
     const navigation = useNavigation();
     const [visiblePages, setVisiblePages] = useState<WeekProp[]>([]);
     const [currentPageIndex, setCurrentPageIndex] = useState(1);
+    const [refreshing, setRefreshing] = useState(false);
     const pagerViewRef = useRef(null);
     
     const { 
@@ -34,7 +36,8 @@ const App = () => {
         getCachedWeeks,
         isWeekCached,
         currentSchedule,
-        isLoading 
+        isLoading,
+        clearCache
     } = useScheduleStore();
 
     // Загрузка начальных данных
@@ -91,10 +94,7 @@ const App = () => {
     const updateVisiblePages = (centerIndex: number) => {
         const allWeeks = getCachedWeeks();
         if (allWeeks.length === 0) return;
-
-        console.log('Updating visible pages with center index:', centerIndex);
-        console.log('All weeks:', allWeeks);
-
+    
         // Получаем три недели для отображения
         const weeksToShow = [];
         for (let i = centerIndex - 1; i <= centerIndex + 1; i++) {
@@ -102,10 +102,9 @@ const App = () => {
                 weeksToShow.push(allWeeks[i]);
             }
         }
-
-        console.log('Weeks to show:', weeksToShow);
+    
         setVisiblePages(weeksToShow);
-
+    
         // Подгружаем следующую неделю если нужно
         const lastWeek = allWeeks[centerIndex + 1];
         if (lastWeek) {
@@ -129,7 +128,7 @@ const App = () => {
                 console.error('Error loading next week:', error);
             }
         }
-
+    
         // Подгружаем предыдущую неделю если нужно
         const firstWeek = allWeeks[centerIndex - 1];
         if (firstWeek) {
@@ -141,7 +140,7 @@ const App = () => {
                 );
                 const prevWeekStart = startOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
                 const prevWeekEnd = endOfWeek(subDays(firstWeekDate, 7), { weekStartsOn: 1 });
-
+    
                 if (!isWeekCached(format(prevWeekStart, 'yyyyMMdd'))) {
                     fetchSchedule({
                         startDate: format(prevWeekStart, 'yyyyMMdd'),
@@ -158,8 +157,6 @@ const App = () => {
     const handlePageSelected = (e: any) => {
         const newIndex = e.nativeEvent.position;
         const allWeeks = getCachedWeeks();
-        
-        // Находим индекс текущей недели в общем массиве
         const currentWeekIndex = allWeeks.findIndex(week => week.week === visiblePages[newIndex]?.week);
         
         if (currentWeekIndex !== -1) {
@@ -168,16 +165,57 @@ const App = () => {
         }
     };
 
+    const onRefresh = useCallback(async () => {
+        if (refreshing) return;
+    
+        try {
+            setRefreshing(true);
+            const allWeeks = getCachedWeeks();
+            const currentDate = new Date();
+            const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+            const currentWeekKey = format(currentWeekStart, 'yyyyMMdd');
+    
+            // Fetch only the current week's data
+            const newData = await fetchSchedule({
+                startDate: currentWeekKey,
+                endDate: format(endOfWeek(currentDate, { weekStartsOn: 1 }), 'yyyyMMdd'),
+                isInitialLoad: false
+            });
+    
+            // Fetch previous and next weeks if not cached
+            const currentWeekIndex = allWeeks.findIndex(week => week.week === currentWeekKey);
+            if (currentWeekIndex !== -1) {
+                // Fetch previous week if not cached
+                const prevWeekStart = startOfWeek(subDays(currentDate, 7), { weekStartsOn: 1 });
+                const prevWeekKey = format(prevWeekStart, 'yyyyMMdd');
+                if (!isWeekCached(prevWeekKey)) {
+                    await fetchSchedule({
+                        startDate: prevWeekKey,
+                        endDate: format(endOfWeek(prevWeekStart, { weekStartsOn: 1 }), 'yyyyMMdd'),
+                        direction: 'prev'
+                    });
+                }
+    
+                // Fetch next week if not cached
+                const nextWeekStart = startOfWeek(addDays(currentDate, 7), { weekStartsOn: 1 });
+                const nextWeekKey = format(nextWeekStart, 'yyyyMMdd');
+                if (!isWeekCached(nextWeekKey)) {
+                    await fetchSchedule({
+                        startDate: nextWeekKey,
+                        endDate: format(endOfWeek(nextWeekStart, { weekStartsOn: 1 }), 'yyyyMMdd'),
+                        direction: 'next'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error refreshing data:', error);
+        } finally {
+            setRefreshing(false); 
+        }
+    }, []);
+
     const renderPage = (index: number) => {
         const weekData = visiblePages[index];
-        console.log('Rendering page with data:', weekData);
-        if (!weekData) {
-            return (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#462ab2" />
-                </View>
-            );
-        }
         return (
             <View style={styles.weekContainer}>
                 <Weeky
@@ -185,12 +223,22 @@ const App = () => {
                     id={weekData.id}
                     week={weekData.week}
                     days={weekData.days || []}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            tintColor="#462ab2"
+                            titleColor="#462ab2"
+                            colors={['#462ab2']}
+                            progressBackgroundColor="#FFFFFF"
+                        />
+                    }
                 />
             </View>
         );
     };
 
-    if (isLoading) {
+    if (isLoading && !refreshing) {
         return (
             <LinearGradient
                 colors={['#462ab2', '#1e124c']}

@@ -7,6 +7,7 @@ export interface WeekProp {
     week: string;
     days: DayProp[];
     onVisibleDayChange?: (day: string) => void;
+    refreshControl?: React.ReactElement;
 }
 
 const getWeek = (date: Date, options: { weekStartsOn: number }) => {
@@ -14,7 +15,7 @@ const getWeek = (date: Date, options: { weekStartsOn: number }) => {
     return Math.ceil((((date.getTime() - oneJan.getTime()) / 86400000) + oneJan.getDay() + 1 - options.weekStartsOn) / 7);
 }
 
-const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
+const Weeky = React.memo(({ week, days, onVisibleDayChange, refreshControl }: WeekProp) => {
     if (!week) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -39,13 +40,13 @@ const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
     };
     const weekPeriod = `${formatDate(weekDate)} - ${formatDate(weekEndDate)}`;
 
-    console.log('Weeky rendering with days:', days);
-
     return (
         <ScrollView 
-        contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 0 }}
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1, width: '100%' }}>
+            contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 0 }}
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1, width: '100%' }}
+            refreshControl={refreshControl}
+        >
             <View style={{ alignItems: 'center', marginBottom: 0, marginTop: 5 }}>
                 <Text style={{ 
                     color: 'white', 
@@ -70,7 +71,7 @@ const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
             <View style={{ flex: 1, width: '100%' }}>
                 {Array.isArray(days) && days.map((item) => (
                     <Day
-                        key={item.id}
+                        key={`${item.id}-${item.day}`}
                         id={item.id}
                         day={item.day}
                         lessons={item.lessons || []}
@@ -82,8 +83,24 @@ const Weeky = React.memo(({ week, days, onVisibleDayChange }: WeekProp) => {
         </ScrollView>
     );
 }, (prevProps, nextProps) => {
-    return prevProps.week === nextProps.week && 
-           prevProps.days?.length === nextProps.days?.length;
+    // Проверяем только необходимые изменения
+    if (prevProps.week !== nextProps.week) return false;
+    if (prevProps.days?.length !== nextProps.days?.length) return false;
+    
+    // Глубокое сравнение дней только если длины равны
+    if (prevProps.days && nextProps.days) {
+        for (let i = 0; i < prevProps.days.length; i++) {
+            const prevDay = prevProps.days[i];
+            const nextDay = nextProps.days[i];
+            if (prevDay.id !== nextDay.id || 
+                prevDay.day !== nextDay.day || 
+                prevDay.lessons?.length !== nextDay.lessons?.length) {
+                return false;
+            }
+        }
+    }
+    
+    return true;
 });
 
 export default Weeky;

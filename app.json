@@ -9,9 +9,9 @@
     "scheme": "studentlite",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/splashScreen.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1e124c"
     },
     "assetBundlePatterns": [
       "**/*"

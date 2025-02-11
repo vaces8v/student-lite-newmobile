@@ -42,6 +42,7 @@ const Lesson = React.memo(({ id, timeStart, timeEnd, lesson, office, theme, esti
 		4: 'text-green-500',
 		5: 'text-lime-500',
 		'н': 'text-red-500',
+		'зач': "text-green-500"
 	}), []);
 
 	const ratingBorderColors = useMemo(() => ({
@@ -52,6 +53,7 @@ const Lesson = React.memo(({ id, timeStart, timeEnd, lesson, office, theme, esti
 		4: 'border-green-500',
 		5: 'border-lime-500',
 		'н': 'border-red-500',
+		'зач': "border-green-500"
 	}), []);
 
 	return (
@@ -101,12 +103,20 @@ const Lesson = React.memo(({ id, timeStart, timeEnd, lesson, office, theme, esti
 												}
 											]
 										}>
-											{item === '0' ? null :
+											{item === '0' || item === 'зач' ? null :
 												<View className={`relative ml-[${index === 0 ? 0 : 5}px] flex items-center justify-center border ${ratingBorderColors[item]} rounded-[10px] min-w-[30px] min-h-[30px]`}>
 													<Text
 														style={{ fontFamily: 'Poppins-Medium' }}
 														className={`absolute text-center text-[22px] bottom-[-7px] ${ratingColors[item]}`}
 													>
+														{item.toString().toUpperCase()}
+													</Text>
+												</View>
+											}
+											{
+												item === 'зач' && 
+												<View className={`flex items-center justify-center border ${ratingBorderColors[item]} rounded-[10px] w-[60px] h-[30px]`}>
+													<Text style={{ fontFamily: 'Poppins-Medium' }} className={`absolute text-center text-[22px] bottom-[-7px] ${ratingColors[item]}`}>
 														{item.toString().toUpperCase()}
 													</Text>
 												</View>

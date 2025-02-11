@@ -16,7 +16,6 @@ import Animated, {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/types/navigation';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DatePickerBottomSheet from '@/components/shared/BottomSheet/DatePickerBottomSheet';
 import { BlurView } from 'expo-blur';
 
@@ -30,16 +29,8 @@ const DatePickerScreen = () => {
     const [isSheetReady, setIsSheetReady] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
             bottomSheetModalRef.current?.present();
-            setIsSheetReady(true);
-            blurOpacity.value = withTiming(1, {
-                duration: 300,
-                easing: Easing.ease
-            });
-        }, 100);
-
-        return () => clearTimeout(timer);
+            setIsSheetReady(true)
     }, []);
 
     const handleDismiss = useCallback(() => {
@@ -77,12 +68,6 @@ const DatePickerScreen = () => {
                         enableDynamicSizing={false}
                         enablePanDownToClose={true}
                         backgroundStyle={styles.bottomSheetBackground}
-                        backdropComponent={() => (<BlurView
-                            style={styles.absolute}
-                            tint='prominent'
-                            intensity={5}
-                            experimentalBlurMethod='dimezisBlurView'
-                        />)}
                     >
                         <TouchableWithoutFeedback>
                             <BottomSheetView>

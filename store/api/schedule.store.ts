@@ -100,7 +100,7 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 					
 					// Явно указываем, что неделя начинается с понедельника
 					const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-					const prevWeekStart = subDays(currentWeekStart, 7);
+					const prevWeekStart = subDays(currentWeekStart, 0);
 					const nextWeekStart = addDays(currentWeekStart, 7);
 					
 					params.startDate = format(prevWeekStart, 'yyyyMMdd');

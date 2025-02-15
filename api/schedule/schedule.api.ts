@@ -30,7 +30,6 @@ export const ScheduleApi = {
         token: string
     }): Promise<ScheduleResponse> {
         try {
-            console.log('Schedule Request Params:', JSON.stringify(params, null, 2));
 
             // Validate and format parameters
             const { studentId, startDate, endDate, token } = params;

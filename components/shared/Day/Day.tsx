@@ -12,7 +12,6 @@ export interface DayProp {
 }
 
 const Day = React.memo(({ day, lessons = [], weekDate, onVisibleDayChange }: DayProp) => {
-	console.log('Day rendering:', { day, lessonsCount: lessons?.length });
 
 	// Преобразуем название дня недели в номер (0-6)
 	const getDayNumber = (dayName: string) => {

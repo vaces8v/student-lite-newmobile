@@ -3,6 +3,7 @@ import { Api } from "@/api/root";
 import { ScheduleResponse, ScheduleDay } from "@/types/api/schedule.types";
 import { useTokenStore } from "./token.store";
 import { format, addDays, subDays, startOfWeek, endOfWeek } from 'date-fns';
+import {WeekProp as WeekPropComponent} from "@/components/shared/Weeky/Weeky";
 
 interface ScheduleState {
 	currentSchedule: ScheduleResponse | null;
@@ -12,6 +13,7 @@ interface ScheduleState {
 	cachedWeeks: Map<string, WeekProp>;
 	currentWeekIndex: number;
 	pendingRequests: Set<string>;
+	getScheduleByWeekIndex: (weekIndex: number) => Promise<WeekPropComponent | null>;
 }
 
 interface ScheduleActions {
@@ -42,6 +44,45 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 	cachedWeeks: new Map(),
 	currentWeekIndex: 0,
 	pendingRequests: new Set(),
+
+	getScheduleByWeekIndex: async (weekIndex: number) => {
+		const state = get();
+
+		// Получаем текущий год
+		const currentYear = new Date().getFullYear();
+
+		// Вычисляем дату начала недели по индексу недели в году
+		const startOfWeekDate = startOfWeek(new Date(currentYear, 0, 1 + (weekIndex - 1) * 7), { weekStartsOn: 1 });
+		const endOfWeekDate = endOfWeek(startOfWeekDate, { weekStartsOn: 1 });
+
+		// Форматируем даты в строки
+		const startDate = format(startOfWeekDate, 'yyyyMMdd');
+		const endDate = format(endOfWeekDate, 'yyyyMMdd');
+
+		// Проверяем, есть ли данные за эту неделю в кэше
+		if (state.cachedWeeks.has(startDate)) {
+			return state.cachedWeeks.get(startDate) || null;
+		}
+
+		// Если данных нет в кэше, запрашиваем их с сервера
+		try {
+			await state.fetchSchedule({
+				startDate,
+				endDate,
+				isInitialLoad: false
+			});
+
+			// После запроса проверяем, появились ли данные в кэше
+			if (state.cachedWeeks.has(startDate)) {
+				return state.cachedWeeks.get(startDate) || null;
+			}
+		} catch (error) {
+			console.error('Error fetching schedule by week index:', error);
+			set({ error: 'Failed to fetch schedule by week index' });
+		}
+
+		return null;
+	},
 
 	fetchStudentId: async () => {
 		try {
@@ -108,7 +149,6 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 				}
 			}
 
-			// Adjust dates based on direction if not provided
 			if (!params.startDate || !params.endDate) {
 				const currentWeeks = state.getCachedWeeks();
 				let referenceDate;
@@ -264,6 +304,7 @@ const scheduleStore: StateCreator<ScheduleState & ScheduleActions> = (set, get) 
 					return {
 						id: parseInt(dateStr),
 						day: dayData.title || '',
+						weekDate: new Date(dateStr.slice(0, 4) + '-' + dateStr.slice(4, 6) + '-' + dateStr.slice(6, 8)), // Added this property
 						lessons: Object.entries(dayData.items || {})
 							.sort(([numA], [numB]) => parseInt(numA) - parseInt(numB))
 							.map(([lessonNum, lesson]) => {
@@ -320,6 +361,7 @@ export interface WeekProp {
 	days: {
 		id: number;
 		day: string;
+		weekDate: Date; // Added this property
 		lessons: {
 			id: number;
 			timeStart: string;
@@ -335,5 +377,6 @@ export interface WeekProp {
 		}[];
 	}[];
 }
+
 
 export const useScheduleStore = create<ScheduleState & ScheduleActions>(scheduleStore);

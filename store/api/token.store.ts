@@ -48,10 +48,8 @@ const sliceStore: StateCreator<TokenState & TokenAction> = (set, get) => ({
                 error: null,
                 isLoading: false 
             });
-            console.log('Token stored successfully');
             return true;
         } catch (error) {
-            console.error('Error in getToken:', error);
             set({ 
                 token: null, 
                 error: 'Ошибка входа', 
@@ -69,10 +67,7 @@ const sliceStore: StateCreator<TokenState & TokenAction> = (set, get) => ({
         try {
             const token = await SecureStore.getItemAsync("stl_token");
             
-            console.log('Retrieved token:', token);
-            
             if (!token) {
-                console.log('No token found');
                 set({ token: null, isLoading: false });
                 return false;
             }

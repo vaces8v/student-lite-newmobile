@@ -8,6 +8,7 @@
     "userInterfaceStyle": "light",
     "scheme": "studentlite",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
     "splash": {
       "image": "./assets/images/splashScreen.png",
       "resizeMode": "contain",
@@ -24,7 +25,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1e124c"
       },
       "package": "org.studentlite.mobile",
       "versionCode": 1,
@@ -38,22 +39,36 @@
         "projectId": "6e6bae20-1fd1-4559-9e0f-66ee191eb536"
       }
     },
-    "cli": {
-      "appVersionSource": "remote"
-    },
     "owner": "vaces8v",
-    "fonts": [
-      {
-        "asset": "./assets/fonts/Poppins-Medium.ttf",
-        "font": "Poppins-Medium"
-      }
-    ],
     "plugins": [
       [
         "expo-secure-store",
         {
           "configureAndroidBackup": true,
           "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1e124c",
+          "image": "./assets/images/splashScreen.png",
+          "dark": {
+            "image": "./assets/images/splashScreen.png",
+            "backgroundColor": "#1e124c"
+          }
+        }
+      ],
+      [
+        "expo-asset",
+        {
+          "assets": [
+            "./assets/images/splashScreen.png",
+            "./assets/images/favicon.png",
+            "./assets/images/icon.png",
+            "./assets/images/logo.png",
+            "./assets/images/adaptive-icon.png"
+          ]
         }
       ]
     ]

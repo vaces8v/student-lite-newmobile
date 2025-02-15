@@ -32,7 +32,7 @@ const generateColorFromString = (str: string): string => {
 const Lesson = React.memo(({ id, timeStart, timeEnd, lesson, office, theme, estimation, onLayout, estimationComments, teacher, homework }: LessonProp & { onLayout?: (height: number) => void; }) => {
 
 	const lessonColor = useMemo(() => generateColorFromString(lesson), [lesson]);
-	console.log(estimation)
+
 
 	const ratingColors = useMemo(() => ({
 		0: 'text-gray-500',

@@ -42,7 +42,7 @@ const Weeky = React.memo(({ week, days, onVisibleDayChange, refreshControl }: We
 
     return (
         <ScrollView 
-            contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 0 }}
+            contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 80 }}
             showsVerticalScrollIndicator={false}
             style={{ flex: 1, width: '100%' }}
             refreshControl={refreshControl}

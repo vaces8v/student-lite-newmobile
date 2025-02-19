@@ -11,7 +11,7 @@ export interface DayProp {
 	onVisibleDayChange?: (day: string) => void;
 }
 
-const Day = React.memo(({ day, lessons = [], weekDate, onVisibleDayChange }: DayProp) => {
+const Day = ({ day, lessons = [], weekDate, onVisibleDayChange }: DayProp) => {
 
 	// Преобразуем название дня недели в номер (0-6)
 	const getDayNumber = (dayName: string) => {
@@ -81,9 +81,6 @@ const Day = React.memo(({ day, lessons = [], weekDate, onVisibleDayChange }: Day
 			)}
 		</View>
 	);
-}, (prevProps, nextProps) => {
-	return prevProps.day === nextProps.day && 
-		   prevProps.lessons?.length === nextProps.lessons?.length;
-});
+}
 
 export default Day;

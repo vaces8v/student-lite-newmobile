@@ -28,6 +28,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="studentlite"/>
         <data android:scheme="org.studentlite.mobile"/>
+        <data android:scheme="exp+student-lite"/>
       </intent-filter>
     </activity>
   </application>

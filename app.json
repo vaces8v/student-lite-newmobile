@@ -10,8 +10,8 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "splash": {
-      "image": "./assets/images/splashScreen.png",
-      "resizeMode": "contain",
+      "image": "./assets/images/splashscreen.png",
+      "resizeMode": "cover",
       "backgroundColor": "#1e124c"
     },
     "assetBundlePatterns": [
@@ -24,7 +24,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/adaptiveicon.png",
         "backgroundColor": "#1e124c"
       },
       "package": "org.studentlite.mobile",
@@ -52,22 +52,28 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#1e124c",
-          "image": "./assets/images/splashScreen.png",
+          "image": "./assets/images/splashscreen.png",
           "dark": {
-            "image": "./assets/images/splashScreen.png",
+            "image": "./assets/images/splashscreen.png",
             "backgroundColor": "#1e124c"
           }
+        }
+      ],
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "most-recent"
         }
       ],
       [
         "expo-asset",
         {
           "assets": [
-            "./assets/images/splashScreen.png",
+            "./assets/images/splashscreen.png",
             "./assets/images/favicon.png",
             "./assets/images/icon.png",
             "./assets/images/logo.png",
-            "./assets/images/adaptive-icon.png"
+            "./assets/images/adaptiveicon.png"
           ]
         }
       ]

@@ -266,25 +266,33 @@ const App = () => {
                 </View>
                 {!loading && (
                     <PagerView
-                        ref={pagerViewRef}
-                        style={styles.contentWrapper}
-                        initialPage={getISOWeek(new Date()) - 1}
-                        onPageSelected={handlePageSelected}
-                    >
-                        {Array.from(Array(52).keys()).map((_, index) => (
-                            <View key={index} style={styles.pageContainer}>
-                                <Weeky id={index} week={allPages[index].week} days={allPages[index].days} refreshControl={
-                                    <RefreshControl
-                                        refreshing={refreshing}
-                                        onRefresh={onRefresh}
-                                        tintColor="#462ab2"
-                                        titleColor="#462ab2"
-                                        colors={['#462ab2']}
-                                        progressBackgroundColor="#FFFFFF"
-                                    />}/>
-                            </View>
-                        ))}
-                    </PagerView>
+                    ref={pagerViewRef}
+                    style={styles.contentWrapper}
+                    initialPage={getISOWeek(new Date()) - 1}
+                    onPageSelected={handlePageSelected}
+                  >
+                    {Array.from(Array(52).keys()).map((_, index) => {
+                      return (
+                        <View key={index} style={styles.pageContainer}>
+                          <Weeky
+                            id={index}
+                            week={allPages[index].week}
+                            days={allPages[index].days}
+                            refreshControl={
+                              <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                                tintColor="#462ab2"
+                                titleColor="#462ab2"
+                                colors={['#462ab2']}
+                                progressBackgroundColor="#FFFFFF"
+                              />
+                            }
+                          />
+                        </View>
+                      );
+                    })}
+                  </PagerView>
                 )}
             </LinearGradient>
         </GestureHandlerRootView>
@@ -302,7 +310,6 @@ const styles = StyleSheet.create({
     },
     contentWrapper: {
         flex: 1,
-        paddingBottom: 80
     },
     pageContainer: {
         flex: 1,

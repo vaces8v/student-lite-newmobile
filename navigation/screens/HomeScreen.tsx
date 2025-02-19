@@ -51,6 +51,7 @@ export default function HomeScreen({ }: HomeScreenNavigationProp) {
         }
 
         try {
+            console.log('login', login, 'password', password);
             const success = await getToken({login, password});
             
             if (success) {

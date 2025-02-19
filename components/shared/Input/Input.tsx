@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         fontSize: 18,
         paddingHorizontal: 20,
-        paddingBottom: 5,    
+        paddingTop: 5,    
         fontFamily: "Poppins-Medium"
     },
     eyeIcon: {
